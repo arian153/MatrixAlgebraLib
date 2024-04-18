@@ -148,6 +148,12 @@ namespace MatrixLib
         }
     }
 
+    void VectorN::Normalize()
+    {
+        Real inv_length = Tools::Inverse(Length());
+        Multiply(inv_length);
+    }
+
     void VectorN::Add(const VectorN& v)
     {
         if (m_fixed_size == v.m_fixed_size)
@@ -230,6 +236,22 @@ namespace MatrixLib
         return false;
     }
 
+    bool VectorN::IsZero() const
+    {
+        for (SizeT i = 0; i < m_fixed_size; ++i)
+        {
+            if (!Tools::IsZero(m_data[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    bool VectorN::IsNormalized() const
+    {
+        return Tools::IsEqual(Length(), Constant::ONE);
+    }
+
     VectorN VectorN::Negated() const
     {
         VectorN negated(m_fixed_size);
@@ -250,6 +272,18 @@ namespace MatrixLib
         }
 
         return invert;
+    }
+
+    VectorN VectorN::Normalized() const
+    {
+        VectorN normalized(m_fixed_size);
+        Real inv_length = Tools::Inverse(Length());
+        for (SizeT i = 0; i < m_fixed_size; ++i)
+        {
+            normalized.m_data[i] = m_data[i] * inv_length;
+        }
+
+        return normalized;
     }
 
     VectorN VectorN::Added(const VectorN& v) const
@@ -330,6 +364,81 @@ namespace MatrixLib
         return Tools::Sqrt(sum);
     }
 
+    Real VectorN::Length() const
+    {
+        return Tools::Sqrt(LengthSq());
+    }
+
+    Real VectorN::LengthSq() const
+    {
+        Real sum = Constant::ZERO;
+        for (SizeT i = 0; i < m_fixed_size; ++i)
+        {
+            sum += m_data[i] * m_data[i];
+        }
+
+        return sum;
+    }
+
+    SizeT VectorN::SmallestIdx() const
+    {
+        SizeT smallest_idx = 0;
+
+        for (SizeT i = 1; i < m_fixed_size; ++i)
+        {
+            if (m_data[i] < m_data[smallest_idx])
+                smallest_idx = i;
+        }
+
+        return smallest_idx;
+    }
+
+    SizeT VectorN::LargestIdx() const
+    {
+        SizeT largest_idx = 0;
+
+        for (SizeT i = 1; i < m_fixed_size; ++i)
+        {
+            if (m_data[i] > m_data[largest_idx])
+                largest_idx = i;
+        }
+
+        return largest_idx;
+    }
+
+    VectorN VectorN::Half() const
+    {
+        VectorN half(m_fixed_size);
+        for (SizeT i = 0; i < m_fixed_size; ++i)
+        {
+            half.m_data[i] = static_cast<Real>(0.5) * m_data[i];
+        }
+
+        return half;
+    }
+
+    VectorN VectorN::Absolute() const
+    {
+        VectorN absolute(m_fixed_size);
+        for (SizeT i = 0; i < m_fixed_size; ++i)
+        {
+            absolute.m_data[i] = Tools::Abs(m_data[i]);
+        }
+
+        return absolute;
+    }
+
+    VectorN VectorN::Scaled(Real s) const
+    {
+        VectorN scaled(m_fixed_size);
+        for (SizeT i = 0; i < m_fixed_size; ++i)
+        {
+            scaled.m_data[i] = s * m_data[i];
+        }
+
+        return scaled;
+    }
+
     VectorN VectorN::ComputeConvexCombination2(const VectorN& a, const VectorN& b, Real u)
     {
         VectorN computed(a.m_fixed_size);
@@ -379,6 +488,56 @@ namespace MatrixLib
     VectorN VectorN::Project(const VectorN& a, const VectorN& b)
     {
         return (DotProduct(a, b) / DotProduct(b, b)) * b;
+    }
+
+    Real VectorN::Distance(const VectorN& a, const VectorN& b)
+    {
+        return b.Subtracted(a).Length();
+    }
+
+    Real VectorN::DistanceSq(const VectorN& a, const VectorN& b)
+    {
+        return b.Subtracted(a).LengthSq();
+    }
+
+    VectorN VectorN::CrossProduct3D(const VectorN& a, const VectorN& b)
+    {
+        if (a.m_fixed_size != b.m_fixed_size)
+            return VectorN(3, Constant::RNAN);
+
+        if (a.m_fixed_size != 3)
+            return VectorN(3, Constant::RNAN);
+
+        VectorN cross(3);
+
+        return cross;
+    }
+
+    VectorN VectorN::CrossProduct7D(const VectorN& a, const VectorN& b)
+    {
+        if (a.m_fixed_size != b.m_fixed_size)
+            return VectorN(7, Constant::RNAN);
+
+        if (a.m_fixed_size != 7)
+            return VectorN(7, Constant::RNAN);
+
+        VectorN cross(7);
+        // TBD
+        return cross;
+    }
+
+    VectorN VectorN::HadamardProduct(const VectorN& a, const VectorN& b)
+    {
+        if (a.m_fixed_size != b.m_fixed_size)
+            return VectorN(1, Constant::RNAN);
+
+        VectorN hadamard(a.m_fixed_size);
+        for (SizeT i = 0; i < a.m_fixed_size; ++i)
+        {
+            hadamard = a.m_data[i] * b.m_data[i];
+        }
+
+        return hadamard;
     }
 
     VectorN operator+(const VectorN& a, const VectorN& b)
