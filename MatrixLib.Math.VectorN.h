@@ -8,7 +8,7 @@ namespace MatrixLib
 {
     class VectorN
     {
-    public: // defaults    
+    public: // defaults
         VectorN(const VectorN& rhs);
         ~VectorN() = default;
         explicit VectorN(const std::vector<Real>& v);
@@ -34,7 +34,6 @@ namespace MatrixLib
 
         // arithmetic operator
         VectorN operator -() const;
-
         VectorN& operator +=(const VectorN& rhs);
         VectorN& operator -=(const VectorN& rhs);
         VectorN& operator +=(Real r);
@@ -42,13 +41,14 @@ namespace MatrixLib
         VectorN& operator *=(Real r);
         VectorN& operator /=(Real r);
 
-    public: // modify methods     
+    public: // modify methods
         void Set(const VectorN& v);
         void SetScalar(Real value);
         void SetZero();
 
         void Negate();
         void Inverse();
+        void Normalize();
         void Add(const VectorN& v);
         void Subtract(const VectorN& v);
         void Add(Real r);
@@ -60,9 +60,12 @@ namespace MatrixLib
 
         bool IsEqual(const VectorN& v) const;
         bool IsNotEqual(const VectorN& v) const;
+        bool IsZero() const;
+        bool IsNormalized() const;
 
         VectorN Negated() const;
         VectorN Invert() const;
+        VectorN Normalized() const;
         VectorN Added(const VectorN& v) const;
         VectorN Subtracted(const VectorN& v) const;
         VectorN Multiplied(Real r) const;
@@ -72,18 +75,14 @@ namespace MatrixLib
         Real  PNorm(Real p) const;
         Real  EuclideanNorm() const;
 
-        // TODO
-        // Length 2Norm
-        // LengthSq
-        // Smallest Idx
-        // Largest Idx
-        // Half
-        // Absolute
-        // Scale
-        // IsZero
-        // IsNormalized
-        // Normalize
-        // Normalized
+        Real Length() const;
+        Real LengthSq() const;
+        SizeT SmallestIdx() const;
+        SizeT LargestIdx() const;
+
+        VectorN Half() const;
+        VectorN Absolute() const;
+        VectorN Scaled(Real s) const;
 
     public: // static methods
         static VectorN ComputeConvexCombination2(const VectorN& a, const VectorN& b, Real u);
@@ -91,14 +90,15 @@ namespace MatrixLib
         static Real    DotProduct(const VectorN& a, const VectorN& b);
         static VectorN Project(const VectorN& a, const VectorN& b);
 
-        // TODO
-        //static Real    Distance(const VectorN& a, const VectorN& b);
-        //static Real    DistanceSq(const VectorN& a, const VectorN& b);
-        //static VectorN CrossProduct3D(const VectorN& a, const VectorN& b);
-        //static VectorN CrossProduct7D(const VectorN& a, const VectorN& b);
-        //static VectorN HadamardProduct(const VectorN& a, const VectorN& b);
-        //static MatrixNM OuterProduct(const VectorN& a, const VectorN& b);
+        static Real    Distance(const VectorN& a, const VectorN& b);
+        static Real    DistanceSq(const VectorN& a, const VectorN& b);
+        static VectorN CrossProduct3D(const VectorN& a, const VectorN& b);
+        static VectorN CrossProduct7D(const VectorN& a, const VectorN& b);
+        static VectorN HadamardProduct(const VectorN& a, const VectorN& b);
 
+        // TODO
+        // static MatrixNM OuterProduct(const VectorN& a, const VectorN& b);
+ 
     private: // private data
         std::vector<Real> m_data;
         SizeT             m_fixed_size = 0;
@@ -125,10 +125,13 @@ namespace MatrixLib
         }
     };
 
+    // arithmetic operator
     VectorN operator +(const VectorN& a, const VectorN& b);
     VectorN operator -(const VectorN& a, const VectorN& b);
     VectorN operator *(Real real, const VectorN& vector);
     VectorN operator *(const VectorN& vector, Real real);
     VectorN operator /(const VectorN& vector, Real real);
+
+    // IO operator
     std::ostream& operator<<(std::ostream& os, const VectorN& rhs);
 }
