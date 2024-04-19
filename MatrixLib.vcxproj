@@ -132,7 +132,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MatrixLib.Math.VectorN.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatrixLib.Math.Constants.h" />

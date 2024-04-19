@@ -4,17 +4,20 @@
 
 namespace MatrixLib::Tools
 {
-    inline Real Min(Real a, Real b)
+    template <typename T>
+    T Min(T a, T b)
     {
         return a < b ? a : b;
     }
 
-    inline Real Max(Real a, Real b)
+    template <typename T>
+    T Max(T a, T b)
     {
         return a > b ? a : b;
     }
 
-    inline Real Clamp(Real x, Real low, Real high)
+    template <typename T>
+    T Clamp(T x, T low, T high)
     {
         return x < low ? low : (x > high ? high : x);
     }
@@ -166,9 +169,16 @@ namespace MatrixLib::Tools
     }
 
     // Round to nearest value.  
-    inline Real ClearError(Real value, Real digit = Constant::EPSILON)
+    inline Real ClearError(Real value, Real epsilon = Constant::EPSILON)
     {
-        return std::round(value / digit) * digit;
+        return std::round(value / epsilon) * epsilon;
+    }
+
+    // Round to nearest value.
+    inline Real ClearDigit(Real value, SizeT digit)
+    {
+        Real epsilon = Pow(static_cast<Real>(10.0), -static_cast<Real>(digit));
+        return std::round(value / epsilon) * epsilon;
     }
 
     inline bool SolveQuadraticEquation(Real a, Real b, Real c, Real& root0, Real& root1)

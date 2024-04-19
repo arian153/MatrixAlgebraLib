@@ -18,9 +18,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MatrixLib.Math.VectorN.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatrixLib.Math.VectorN.h">
@@ -31,6 +28,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MatrixLib.Math.Tools.h" />
+    <None Include="MatrixLib.Math.Tools.h">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
