@@ -11,25 +11,28 @@ namespace MatrixLib
     template <SizeT N>
     class VectorN
     {
-    public: // defaults
+    private: // private data
+        std::array<Real, N> m_elements;
+
+    public: // constructors
         VectorN();
+        VectorN(std::initializer_list<Real> values);
+        VectorN(const VectorN& rhs);
+        ~VectorN() = default;
         explicit VectorN(Real scalar);
         explicit VectorN(const std::vector<Real>& vec);
         explicit VectorN(const std::array<Real, N>& arr);
         explicit VectorN(Real arr[N]);
-        VectorN(std::initializer_list<Real> values);
-        VectorN(const VectorN& rhs);
-        ~VectorN() = default;
 
     public: // operators
         // explicit operator
         explicit operator std::vector<Real>() const;
 
         // access operator
-        Real  operator[](size_t i) const;
-        Real& operator[](size_t i);
-        Real  operator()(size_t i) const;
-        Real& operator()(size_t i);
+        Real  operator[](SizeT i) const;
+        Real& operator[](SizeT i);
+        Real  operator()(SizeT i) const;
+        Real& operator()(SizeT i);
 
         // assignment operator
         VectorN& operator =(const VectorN& rhs);
@@ -91,7 +94,7 @@ namespace MatrixLib
         Real Norm() const;
 
         template <SizeT M>
-        VectorN<M> Select(std::initializer_list<SizeT> indices_list) const;
+        VectorN<M> Swizzle(std::initializer_list<SizeT> indices_list) const;
 
     public: // static methods
         static SizeT      Dimension();
@@ -106,12 +109,6 @@ namespace MatrixLib
         static VectorN<3> CrossProduct(const VectorN<3>& a, const VectorN<3>& b);
         static VectorN<7> CrossProduct(const VectorN<7>& a, const VectorN<7>& b);
 
-        // TODO
-        // static MatrixNM OuterProduct(const VectorN& a, const VectorN& b);
-
-    private: // private data
-        std::array<Real, N> m_elements;
-
     public: // range based for loop related methods
         auto begin();
         auto end();
@@ -123,6 +120,24 @@ namespace MatrixLib
     VectorN<N>::VectorN()
     {
         m_elements.fill(Constant::ZERO);
+    }
+
+    template <SizeT N>
+    VectorN<N>::VectorN(std::initializer_list<Real> values)
+    {
+        m_elements.fill(Constant::ZERO);
+
+        SizeT valid_compo_count = Tools::Min(N, values.size());
+        for (SizeT i = 0; i < valid_compo_count; ++i)
+        {
+            m_elements[i] = *(values.begin() + i);
+        }
+    }
+
+    template <SizeT N>
+    VectorN<N>::VectorN(const VectorN& rhs)
+        : m_elements(rhs.m_elements)
+    {
     }
 
     template <SizeT N>
@@ -159,49 +174,31 @@ namespace MatrixLib
     }
 
     template <SizeT N>
-    VectorN<N>::VectorN(std::initializer_list<Real> values)
-    {
-        m_elements.fill(Constant::ZERO);
-
-        SizeT valid_compo_count = Tools::Min(N, values.size());
-        for (SizeT i = 0; i < valid_compo_count; ++i)
-        {
-            m_elements[i] = *(values.begin() + i);
-        }
-    }
-
-    template <SizeT N>
-    VectorN<N>::VectorN(const VectorN& rhs)
-        : m_elements(rhs.m_elements)
-    {
-    }
-
-    template <SizeT N>
     VectorN<N>::operator std::vector<Real>() const
     {
         return std::vector<Real>(m_elements);
     }
 
     template <SizeT N>
-    Real VectorN<N>::operator[](size_t i) const
+    Real VectorN<N>::operator[](SizeT i) const
     {
         return m_elements[i];
     }
 
     template <SizeT N>
-    Real& VectorN<N>::operator[](size_t i)
+    Real& VectorN<N>::operator[](SizeT i)
     {
         return m_elements[i];
     }
 
     template <SizeT N>
-    Real VectorN<N>::operator()(size_t i) const
+    Real VectorN<N>::operator()(SizeT i) const
     {
         return m_elements[i];
     }
 
     template <SizeT N>
-    Real& VectorN<N>::operator()(size_t i)
+    Real& VectorN<N>::operator()(SizeT i)
     {
         return m_elements[i];
     }
@@ -607,7 +604,7 @@ namespace MatrixLib
 
     template <SizeT N>
     template <SizeT M>
-    VectorN<M> VectorN<N>::Select(std::initializer_list<SizeT> indices_list) const
+    VectorN<M> VectorN<N>::Swizzle(std::initializer_list<SizeT> indices_list) const
     {
         VectorN<M> selected;
         SizeT      valid_compo_count = Tools::Min(M, indices_list.size());

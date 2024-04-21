@@ -22,6 +22,14 @@ namespace MatrixLib::Tools
         return x < low ? low : (x > high ? high : x);
     }
 
+    template <typename T>
+    void Swap(T& a, T& b)
+    {
+        T t = a;
+        a   = b;
+        b   = t;
+    }
+
     inline Real Abs(Real rhs)
     {
         return std::abs(rhs);
