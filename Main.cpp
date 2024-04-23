@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "MatrixLib.Math.MatrixMxN.h"
 #include "MatrixLib.Math.VectorN.h"
 
@@ -23,23 +24,55 @@ int main()
 
     std::cout << MatrixLib::VectorN<7>::CrossProduct(v7_a, v7_b) << std::endl;
 
-    v7_a.Normalize();
+    //v7_a.Normalize();
     auto v4_a = v7_a.Swizzle<4>({ 4, 4, 3 });
     std::cout << v4_a << std::endl;
 
     v4_a.ClearDigit(2);
     std::cout << v4_a << std::endl;
 
-    MatrixLib::MatrixMxN<4, 3> mat_a = {
-        v7_a.Swizzle<3>({ 5, 4, 3 })
-        , v7_a.Swizzle<3>({ 2, 1, 6 })
-        , v7_a.Swizzle<3>({ 0, 1, 2 })
-        , v7_a.Swizzle<3>({ 4, 4, 5 }) };
+    MatrixLib::MatrixMxN<3, 3> mat_a = {
+        v7_a.Swizzle<3>({ 5, 4, 3 }),
+        v7_a.Swizzle<3>({ 2, 1, 6 }),
+        v7_a.Swizzle<3>({ 0, 1, 2 })
+    };
     std::cout << "mat_a: " << mat_a << std::endl;
 
-    mat_a.ClearDigit(3);
-
+    //mat_a.ClearDigit(3);
     std::cout << "mat_a: " << mat_a << std::endl;
+
+    auto inv_a = MatrixLib::MatrixMxN<3, 3>::Inverse(mat_a);
+    std::cout << "inv_a: " << inv_a << std::endl;
+
+    auto mul_a = Multiply(mat_a, inv_a);
+    mul_a.ClearDigit(5);
+    std::cout << "mul_a: " << mul_a << std::endl;
+
+    auto mul_b = Multiply(inv_a, mat_a);
+    mul_b.ClearDigit(5);
+    std::cout << "mul_b: " << mul_b << std::endl;
+
+    auto inv_aa = MatrixLib::MatrixMxN<3, 3>::Inverse(inv_a);
+    std::cout << "inv_aa: " << inv_aa << std::endl;
+    auto mul_c = Multiply(inv_a, inv_aa);
+    mul_c.ClearDigit(5);
+    std::cout << "mul_c: " << mul_c << std::endl;
+
+    MatrixLib::MatrixMxN<3, 5> mat_d = {
+        v7_a.Swizzle<5>({ 5, 4, 3, 3, 1 }),
+        v7_a.Swizzle<5>({ 2, 1, 6, 0, 3 }),
+        v7_a.Swizzle<5>({ 0, 1, 2, 4, 5 })
+    };
+
+    std::cout << "mat_d: " << mat_d << std::endl;
+    std::cout << "trs_d: " << MatrixLib::MatrixMxN<3, 5>::Transpose(mat_d) << std::endl;
+
+    auto inv_d = MatrixLib::MatrixMxN<3, 5>::PseudoInverse(mat_d);
+    std::cout << "inv_d: " << inv_d << std::endl;
+
+    auto mul_d = Multiply(mat_d, inv_d);
+    mul_d.ClearDigit(5);    
+    std::cout << "mul_d 1: " << mul_d << std::endl;
 
     return 0;
 }

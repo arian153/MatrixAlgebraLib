@@ -382,6 +382,8 @@ namespace MatrixLib
         for (SizeT i = 0; i < N; ++i)
         {
             m_elements[i] = Tools::ClearDigit(m_elements[i], digit);
+            if (Tools::IsZero(m_elements[i]))
+                m_elements[i] = Constant::ZERO;
         }
     }
 
@@ -391,6 +393,8 @@ namespace MatrixLib
         for (SizeT i = 0; i < N; ++i)
         {
             m_elements[i] = Tools::ClearError(m_elements[i], epsilon);
+            if (Tools::IsZero(m_elements[i]))
+                m_elements[i] = Constant::ZERO;
         }
     }
 
@@ -805,12 +809,14 @@ namespace MatrixLib
     template <SizeT N>
     std::ostream& operator<<(std::ostream& os, const VectorN<N>& rhs)
     {
-        os << "{";
-        for (SizeT i = 0; i < N - 1; ++i)
+        os << "{" << rhs[0];
+
+        for (SizeT i = 1; i < N; ++i)
         {
-            os << rhs[i] << ", ";
+            os << ", " << rhs[i];
         }
-        os << rhs[N - 1] << "}";
+
+        os << "}";
 
         return os;
     }
