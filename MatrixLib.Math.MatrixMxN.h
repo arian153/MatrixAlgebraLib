@@ -64,42 +64,41 @@ namespace MatrixLib
         void Multiply(Real r);
         void Divide(Real r);
         void Negate();
-        void Inverse();
-        //void Transpose();
         void ClearDigit(SizeT digit);
         void ClearError(Real epsilon);
 
         //TODO
-        // Transpose
-        // Trace
-        // Determinant
-        // Inverse
-        // Adjoint
+        //void Inverse();
+        //void Transpose();
+        // Trace // https://en.wikipedia.org/wiki/Trace_(linear_algebra)
+        // Adjugate // https://en.wikipedia.org/wiki/Adjugate_matrix
+        // Cofactor // https://en.wikipedia.org/wiki/Minor_(linear_algebra)
         // Hadamard Product
-        // Multiply MxN * NxM
 
-        VectorN<N> Row(SizeT row) const;
-        VectorN<M> Column(SizeT col) const;
-
-    public:
-        MatrixMxN Invert() const;
-
-    public:
-        static MatrixMxN<N, M> Transpose(const MatrixMxN& mat);
-        static SizeT           Rank(const MatrixMxN& mat_g, Real tolerance = Constant::EPSILON);
-        static Real            Determinant(const MatrixMxN& mat_g);
-        static MatrixMxN       Inverse(const MatrixMxN& mat_g, bool use_permute = true);
-        static MatrixMxN<N, M> PseudoInverse(const MatrixMxN& input, Real tolerance = Constant::EPSILON);
-        static MatrixMxN       SolveAxEqualB(const MatrixMxN& mat_a, const MatrixMxN& mat_b);
-
-        template <SizeT O>
-        static MatrixMxN<M, O> Multiply(MatrixMxN a, MatrixMxN<N, O> b);
+        //Real Determinant() const;
+        VectorN<N>      Row(SizeT row) const;
+        VectorN<M>      Column(SizeT col) const;
+        MatrixMxN<N, M> Invert() const;
+        //MatrixMxN<N, M> Transpose() const;
 
     public: // range based for loop related methods
         auto begin();
         auto end();
         auto begin() const;
         auto end() const;
+
+    private: // private implementations 
+        static MatrixMxN<N, M> TransposeImpl(const MatrixMxN& input_mat_g);
+        static SizeT           RankImpl(const MatrixMxN& input_mat_g, Real tolerance);
+        static Real            DeterminantImpl(const MatrixMxN& input_mat_g);
+        static MatrixMxN       InverseImpl(const MatrixMxN& input_mat_g, bool use_permute);
+        static MatrixMxN<N, M> PseudoInverseImpl(const MatrixMxN& input_mat_g, Real tolerance);
+
+        template <SizeT A, SizeT B, SizeT C>
+        static MatrixMxN<B, C> SolveImpl(const MatrixMxN<A, B>& mat_a, const MatrixMxN<A, C>& mat_b);
+
+        template <SizeT A, SizeT B, SizeT C>
+        static MatrixMxN<A, C> MultiplyImpl(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b);
 
     private: // Free-Size Matrix for some calculations;
         class MatrixFxF
@@ -189,6 +188,55 @@ namespace MatrixLib
         public:
             std::vector<std::vector<Real>> data;
         };
+
+    public: // friend
+        friend class Matrix;
+    };
+
+    class Matrix
+    {
+    public:
+        template <SizeT R, SizeT C>
+        static MatrixMxN<C, R> Transpose(const MatrixMxN<R, C>& mat)
+        {
+            return MatrixMxN<R, C>::TransposeImpl(mat);
+        }
+
+        template <SizeT R, SizeT C>
+        static SizeT Rank(const MatrixMxN<R, C>& mat, Real tolerance = Constant::EPSILON)
+        {
+            return MatrixMxN<R, C>::RankImpl(mat, tolerance);
+        }
+
+        template <SizeT R, SizeT C>
+        static Real Determinant(const MatrixMxN<R, C>& mat)
+        {
+            return MatrixMxN<R, C>::DeterminantImpl(mat);
+        }
+
+        template <SizeT R, SizeT C>
+        static MatrixMxN<R, C> Inverse(const MatrixMxN<R, C>& mat, bool use_permute = true)
+        {
+            return MatrixMxN<R, C>::InverseImpl(mat, use_permute);
+        }
+
+        template <SizeT R, SizeT C>
+        static MatrixMxN<C, R> PseudoInverse(const MatrixMxN<R, C>& mat, Real tolerance = Constant::EPSILON)
+        {
+            return MatrixMxN<R, C>::PseudoInverseImpl(mat, tolerance);
+        }
+
+        template <SizeT A, SizeT B, SizeT C>
+        static MatrixMxN<B, C> Solve(const MatrixMxN<A, B>& mat_a, const MatrixMxN<A, C>& mat_b)
+        {
+            return MatrixMxN<A, B>::SolveImpl(mat_a, mat_b);
+        }
+
+        template <SizeT A, SizeT B, SizeT C>
+        static MatrixMxN<A, C> Multiply(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b)
+        {
+            return MatrixMxN<A, B>::MultiplyImpl(mat_a, mat_b);
+        }
     };
 
     template <SizeT M, SizeT N>
@@ -420,22 +468,6 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
-    void MatrixMxN<M, N>::Inverse()
-    {
-        if (M == N)
-        {
-            MatrixMxN          lu;
-            std::vector<SizeT> p;
-
-            if (LUPDecompose(this, lu, p))
-            {
-                MatrixMxN invert = LUPInverse(lu, p);
-                Set(invert);
-            }
-        }
-    }
-
-    template <SizeT M, SizeT N>
     void MatrixMxN<M, N>::ClearDigit(SizeT digit)
     {
         for (SizeT row = 0; row < M; ++row)
@@ -472,28 +504,30 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
-    MatrixMxN<M, N> MatrixMxN<M, N>::Invert() const
+    MatrixMxN<N, M> MatrixMxN<M, N>::Invert() const
     {
-        MatrixMxN invert;
+        if constexpr (M == N)
+            return Matrix::Inverse(this);
 
-        return invert;
+        return Matrix::PseudoInverse(this);
     }
 
     template <SizeT M, SizeT N>
-    MatrixMxN<N, M> MatrixMxN<M, N>::Transpose(const MatrixMxN& mat)
+    MatrixMxN<N, M> MatrixMxN<M, N>::TransposeImpl(const MatrixMxN& input_mat_g)
     {
         MatrixMxN<N, M> transposed;
         for (SizeT i = 0; i < M; ++i)
         {
-            transposed.SetColumn(i, mat.Row(i));
+            transposed.SetColumn(i, input_mat_g.Row(i));
         }
 
         return transposed;
     }
 
     template <SizeT M, SizeT N>
-    SizeT MatrixMxN<M, N>::Rank(const MatrixMxN& mat_g, Real tolerance)
+    SizeT MatrixMxN<M, N>::RankImpl(const MatrixMxN& input_mat_g, Real tolerance)
     {
+        // https://en.wikipedia.org/wiki/Cholesky_decomposition
         // Cholesky decomposition	
         constexpr SizeT       size = M < N ? M : N;
         MatrixMxN<size, size> mat_a;
@@ -507,7 +541,7 @@ namespace MatrixLib
                 {
                     for (SizeT k = 0; k < N; ++k)
                     {
-                        mat_a[i][j] += mat_g[i][k] * mat_g[j][k];
+                        mat_a[i][j] += input_mat_g[i][k] * input_mat_g[j][k];
                     }
                 }
             }
@@ -521,7 +555,7 @@ namespace MatrixLib
                 {
                     for (SizeT k = 0; k < N; ++k)
                     {
-                        mat_a[i][j] += mat_g[k][i] * mat_g[k][j];
+                        mat_a[i][j] += input_mat_g[k][i] * input_mat_g[k][j];
                     }
                 }
             }
@@ -572,8 +606,10 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
-    Real MatrixMxN<M, N>::Determinant(const MatrixMxN& mat_g)
+    Real MatrixMxN<M, N>::DeterminantImpl(const MatrixMxN& input_mat_g)
     {
+        // https://en.wikipedia.org/wiki/LU_decomposition
+
         // 0. Check Square Matrix
         if constexpr (M != N)
             return Constant::ZERO;
@@ -593,7 +629,7 @@ namespace MatrixLib
                 Real max_value = Constant::ZERO;
                 for (SizeT i = j; i < N; ++i)
                 {
-                    Real current_v = Tools::Abs(mat_g[permute_lu[i]][j]);
+                    Real current_v = Tools::Abs(input_mat_g[permute_lu[i]][j]);
                     if (current_v > max_value)
                     {
                         max_value = current_v;
@@ -612,7 +648,7 @@ namespace MatrixLib
 
             for (SizeT i = 0; i < N; ++i)
             {
-                mat_lu.SetRow(i, mat_g[permute_lu[i]]);
+                mat_lu.SetRow(i, input_mat_g[permute_lu[i]]);
             }
         }
 
@@ -668,8 +704,9 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
-    MatrixMxN<M, N> MatrixMxN<M, N>::Inverse(const MatrixMxN& mat_g, bool use_permute)
+    MatrixMxN<M, N> MatrixMxN<M, N>::InverseImpl(const MatrixMxN& input_mat_g, bool use_permute)
     {
+        // https://en.wikipedia.org/wiki/LU_decomposition
         // 0. Check Square Matrix
         if constexpr (M != N)
             return MatrixMxN();
@@ -692,7 +729,7 @@ namespace MatrixLib
                     Real max_v = Constant::ZERO;
                     for (SizeT i = j; i < N; ++i)
                     {
-                        Real current_v = Tools::Abs(mat_g[permute_lu[i]][j]);
+                        Real current_v = Tools::Abs(input_mat_g[permute_lu[i]][j]);
                         if (current_v > max_v)
                         {
                             max_v = current_v;
@@ -708,13 +745,13 @@ namespace MatrixLib
                 for (SizeT i = 0; i < N; ++i)
                 {
                     // Make a permuted matrix with new row order
-                    mat_lu.SetRow(i, mat_g[permute_lu[i]]);
+                    mat_lu.SetRow(i, input_mat_g[permute_lu[i]]);
                 }
             }
             else
             {
                 // duplicate matrix
-                mat_lu = mat_g;
+                mat_lu = input_mat_g;
             }
         }
 
@@ -827,12 +864,13 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
-    MatrixMxN<N, M> MatrixMxN<M, N>::PseudoInverse(const MatrixMxN& input, Real tolerance)
+    MatrixMxN<N, M> MatrixMxN<M, N>::PseudoInverseImpl(const MatrixMxN& input_mat_g, Real tolerance)
     {
+        // https://en.wikipedia.org/wiki/Moore-Penrose_inverse
         constexpr SizeT size = M < N ? M : N;
 
         MatrixFxF mat_a;
-        MatrixFxF mat_g(input);
+        MatrixFxF mat_g(input_mat_g);
         MatrixFxF mat_g_transposed = MatrixFxF::Transpose(mat_g);
 
         if constexpr (M < N)
@@ -908,45 +946,47 @@ namespace MatrixLib
         // Generalized inverse
         MatrixFxF             mat_l_transposed = MatrixFxF::Transpose(mat_l);
         MatrixFxF             mat_lt_l         = MatrixFxF::Multiply(mat_l_transposed, mat_l);
-        MatrixMxN<size, size> mat_inv_lt_l     = MatrixMxN<size, size>::Inverse(mat_lt_l.template ToMatrixMxN<size, size>(), false);
+        MatrixMxN<size, size> mat_inv_lt_l     = Matrix::Inverse(mat_lt_l.template ToMatrixMxN<size, size>(), false);
 
-        // M = inv(L' * L)
+        // M = inv(Lt * L)
         MatrixFxF mat_m(mat_inv_lt_l);
 
-        // A = L * M * M * L'
+        // inv = L * M * M * Lt
         MatrixFxF pseudo_invert = MatrixFxF::Multiply(MatrixFxF::Multiply(MatrixFxF::Multiply(mat_l, mat_m), mat_m), mat_l_transposed);
 
         if constexpr (M < N)
         {
-            // pseudo_inverse(G) = G' * (L * M * M * L')
+            // pseudo_inverse(G) = Gt * (L * M * M * Lt)
             return MatrixFxF::Multiply(mat_g_transposed, pseudo_invert).template ToMatrixMxN<N, M>();
         }
         else
         {
-            // pseudo_inverse(G) = (L * M * M * L') * G'
+            // pseudo_inverse(G) = (L * M * M * Lt) * Gt
             return MatrixFxF::Multiply(pseudo_invert, mat_g_transposed).template ToMatrixMxN<N, M>();
         }
     }
 
     template <SizeT M, SizeT N>
-    MatrixMxN<M, N> MatrixMxN<M, N>::SolveAxEqualB(const MatrixMxN& mat_a, const MatrixMxN& mat_b)
+    template <SizeT A, SizeT B, SizeT C>
+    MatrixMxN<B, C> MatrixMxN<M, N>::SolveImpl(const MatrixMxN<A, B>& mat_a, const MatrixMxN<A, C>& mat_b)
     {
         // Solve A * x = b;
         // x = A^-1 * b;
-        MatrixMxN x = Multiply(PseudoInverse(mat_a), mat_b);
+        MatrixMxN<B, A> inv_a = Matrix::PseudoInverse(mat_a);
+        MatrixMxN<B, C> x     = Matrix::Multiply(inv_a, mat_b);
         return x;
     }
 
     template <SizeT M, SizeT N>
-    template <SizeT O>
-    MatrixMxN<M, O> MatrixMxN<M, N>::Multiply(MatrixMxN a, MatrixMxN<N, O> b)
+    template <SizeT A, SizeT B, SizeT C>
+    MatrixMxN<A, C> MatrixMxN<M, N>::MultiplyImpl(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b)
     {
-        MatrixMxN<M, O> multiplied;
-        for (SizeT row = 0; row < M; ++row)
+        MatrixMxN<A, C> multiplied;
+        for (SizeT row = 0; row < A; ++row)
         {
-            for (SizeT col = 0; col < O; ++col)
+            for (SizeT col = 0; col < C; ++col)
             {
-                multiplied(row, col) = VectorN<N>::DotProduct(a.Row(row), b.Column(col));
+                multiplied(row, col) = VectorN<B>::DotProduct(mat_a.Row(row), mat_b.Column(col));
             }
         }
 
@@ -975,23 +1015,6 @@ namespace MatrixLib
     auto MatrixMxN<M, N>::end() const
     {
         return m_elements.end();
-    }
-
-    // ari
-
-    template <SizeT M, SizeT N, SizeT O>
-    MatrixMxN<M, O> Multiply(MatrixMxN<M, N> a, MatrixMxN<N, O> b)
-    {
-        MatrixMxN<M, O> multiplied;
-        for (SizeT row = 0; row < M; ++row)
-        {
-            for (SizeT col = 0; col < O; ++col)
-            {
-                multiplied(row, col) = VectorN<N>::DotProduct(a.Row(row), b.Column(col));
-            }
-        }
-
-        return multiplied;
     }
 
     // IO operator

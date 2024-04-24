@@ -41,20 +41,20 @@ int main()
     //mat_a.ClearDigit(3);
     std::cout << "mat_a: " << mat_a << std::endl;
 
-    auto inv_a = MatrixLib::MatrixMxN<3, 3>::Inverse(mat_a);
+    auto inv_a = MatrixLib::Matrix::Inverse(mat_a);
     std::cout << "inv_a: " << inv_a << std::endl;
 
-    auto mul_a = Multiply(mat_a, inv_a);
+    auto mul_a = MatrixLib::Matrix::Multiply(mat_a, inv_a);
     mul_a.ClearDigit(5);
     std::cout << "mul_a: " << mul_a << std::endl;
 
-    auto mul_b = Multiply(inv_a, mat_a);
+    auto mul_b = MatrixLib::Matrix::Multiply(inv_a, mat_a);
     mul_b.ClearDigit(5);
     std::cout << "mul_b: " << mul_b << std::endl;
 
-    auto inv_aa = MatrixLib::MatrixMxN<3, 3>::Inverse(inv_a);
+    auto inv_aa = MatrixLib::Matrix::Inverse(inv_a);
     std::cout << "inv_aa: " << inv_aa << std::endl;
-    auto mul_c = Multiply(inv_a, inv_aa);
+    auto mul_c = MatrixLib::Matrix::Multiply(inv_a, inv_aa);
     mul_c.ClearDigit(5);
     std::cout << "mul_c: " << mul_c << std::endl;
 
@@ -65,14 +65,29 @@ int main()
     };
 
     std::cout << "mat_d: " << mat_d << std::endl;
-    std::cout << "trs_d: " << MatrixLib::MatrixMxN<3, 5>::Transpose(mat_d) << std::endl;
+    std::cout << "trs_d: " << MatrixLib::Matrix::Transpose(mat_d) << std::endl;
 
-    auto inv_d = MatrixLib::MatrixMxN<3, 5>::PseudoInverse(mat_d);
+    auto inv_d = MatrixLib::Matrix::PseudoInverse(mat_d);
     std::cout << "inv_d: " << inv_d << std::endl;
 
-    auto mul_d = Multiply(mat_d, inv_d);
-    mul_d.ClearDigit(5);    
+    auto mul_d = MatrixLib::Matrix::Multiply(mat_d, inv_d);
+    mul_d.ClearDigit(5);
     std::cout << "mul_d 1: " << mul_d << std::endl;
+
+    MatrixLib::MatrixMxN<3, 1> mat_e = { 12.0f, 43.0f, 23.0f };
+
+    auto x = MatrixLib::Matrix::Solve(mat_d, mat_e);
+
+    std::cout << "Ax = b" << std::endl;
+    std::cout << "A:" << mat_d << std::endl;
+
+    std::cout << "b: " << mat_e << std::endl;
+
+    std::cout << "x: " << x << std::endl;
+
+    auto b = MatrixLib::Matrix::Multiply(mat_d, x);
+    b.ClearDigit(5);
+    std::cout << "b: " << b << std::endl;
 
     return 0;
 }
