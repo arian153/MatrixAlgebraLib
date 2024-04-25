@@ -97,10 +97,11 @@ namespace MatrixLib
         VectorN<M> Swizzle(std::initializer_list<SizeT> indices_list) const;
 
     public: // static methods
-        static SizeT      Dimension();
-        static VectorN    ComputeConvexCombination2(const VectorN& a, const VectorN& b, Real u);
-        static VectorN    ComputeConvexCombination3(const VectorN& a, const VectorN& b, const VectorN& c, Real u, Real v);
-        static VectorN    ComputeConvexCombinationN(std::vector<VectorN> vectors, std::vector<Real> params);
+        static SizeT   Dimension();
+        static VectorN ComputeConvexCombination2(const VectorN& a, const VectorN& b, Real u);
+        static VectorN ComputeConvexCombination3(const VectorN& a, const VectorN& b, const VectorN& c, Real u, Real v);
+        template <SizeT K>
+        static VectorN    ComputeConvexCombinationN(std::array<VectorN, K> vectors, std::array<Real, K> params);
         static VectorN    Project(const VectorN& project_a, const VectorN& onto_b);
         static Real       Distance(const VectorN& a, const VectorN& b);
         static Real       DistanceSq(const VectorN& a, const VectorN& b);
@@ -653,22 +654,20 @@ namespace MatrixLib
     }
 
     template <SizeT N>
-    VectorN<N> VectorN<N>::ComputeConvexCombinationN(std::vector<VectorN> vectors, std::vector<Real> params)
+    template <SizeT K>
+    VectorN<N> VectorN<N>::ComputeConvexCombinationN(std::array<VectorN, K> vectors, std::array<Real, K> params)
     {
-        VectorN computed;
-        if (vectors.size() == params.size())
+        VectorN    computed;
+        VectorN<K> convex_params = VectorN<K>(params);
+        Real       norm_one      = convex_params.template Norm<Constant::ONE>();
+        if (Tools::IsEqual(Constant::ONE, norm_one))
         {
-            VectorN<params.size()> convex_params = VectorN<params.size()>(params);
-            Real                   norm_one      = convex_params.Norm<Constant::ONE>();
-            if (Tools::IsEqual(Constant::ONE, norm_one))
+            for (SizeT i = 0; i < N; ++i)
             {
-                for (SizeT i = 0; i < N; ++i)
+                computed.m_elements[i] = Constant::ZERO;
+                for (SizeT j = 0; j < convex_params.Dimension(); ++j)
                 {
-                    computed.m_elements[i] = Constant::ZERO;
-                    for (SizeT j = 0; j < convex_params.Dimension(); ++j)
-                    {
-                        computed.m_elements[i] += convex_params[j] * vectors[j].m_elements[i];
-                    }
+                    computed.m_elements[i] += convex_params[j] * vectors[j].m_elements[i];
                 }
             }
         }
