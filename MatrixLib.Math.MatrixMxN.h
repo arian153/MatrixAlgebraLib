@@ -70,10 +70,6 @@ namespace MatrixLib
         //TODO
         //void Inverse();
         //void Transpose();
-        // Trace // https://en.wikipedia.org/wiki/Trace_(linear_algebra)
-        // Adjugate // https://en.wikipedia.org/wiki/Adjugate_matrix
-        // Cofactor // https://en.wikipedia.org/wiki/Minor_(linear_algebra)
-        // Hadamard Product
 
         //Real Determinant() const;
         VectorN<N>      Row(SizeT row) const;
@@ -99,6 +95,14 @@ namespace MatrixLib
 
         template <SizeT A, SizeT B, SizeT C>
         static MatrixMxN<A, C> MultiplyImpl(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b);
+
+        // Trace // https://en.wikipedia.org/wiki/Trace_(linear_algebra)
+        // Adjugate // https://en.wikipedia.org/wiki/Adjugate_matrix
+        // Cofactor // https://en.wikipedia.org/wiki/Minor_(linear_algebra)
+        // Hadamard Product
+
+        static MatrixMxN HadamardProductImpl(const MatrixMxN& mat_a, const MatrixMxN& mat_b);
+        static MatrixMxN OuterProductImpl(const VectorN<M>& vec_a, const VectorN<N>& vec_b);
 
     private: // Free-Size Matrix for some calculations;
         class MatrixFxF
@@ -196,46 +200,58 @@ namespace MatrixLib
     class Matrix
     {
     public:
-        template <SizeT R, SizeT C>
-        static MatrixMxN<C, R> Transpose(const MatrixMxN<R, C>& mat)
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Col, Row> Transpose(const MatrixMxN<Row, Col>& mat)
         {
-            return MatrixMxN<R, C>::TransposeImpl(mat);
+            return MatrixMxN<Row, Col>::TransposeImpl(mat);
         }
 
-        template <SizeT R, SizeT C>
-        static SizeT Rank(const MatrixMxN<R, C>& mat, Real tolerance = Constant::EPSILON)
+        template <SizeT Row, SizeT Col>
+        static SizeT Rank(const MatrixMxN<Row, Col>& mat, Real tolerance = Constant::EPSILON)
         {
-            return MatrixMxN<R, C>::RankImpl(mat, tolerance);
+            return MatrixMxN<Row, Col>::RankImpl(mat, tolerance);
         }
 
-        template <SizeT R, SizeT C>
-        static Real Determinant(const MatrixMxN<R, C>& mat)
+        template <SizeT Row, SizeT Col>
+        static Real Determinant(const MatrixMxN<Row, Col>& mat)
         {
-            return MatrixMxN<R, C>::DeterminantImpl(mat);
+            return MatrixMxN<Row, Col>::DeterminantImpl(mat);
         }
 
-        template <SizeT R, SizeT C>
-        static MatrixMxN<R, C> Inverse(const MatrixMxN<R, C>& mat, bool use_permute = true)
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> Inverse(const MatrixMxN<Row, Col>& mat, bool use_permute = true)
         {
-            return MatrixMxN<R, C>::InverseImpl(mat, use_permute);
+            return MatrixMxN<Row, Col>::InverseImpl(mat, use_permute);
         }
 
-        template <SizeT R, SizeT C>
-        static MatrixMxN<C, R> PseudoInverse(const MatrixMxN<R, C>& mat, Real tolerance = Constant::EPSILON)
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Col, Row> PseudoInverse(const MatrixMxN<Row, Col>& mat, Real tolerance = Constant::EPSILON)
         {
-            return MatrixMxN<R, C>::PseudoInverseImpl(mat, tolerance);
+            return MatrixMxN<Row, Col>::PseudoInverseImpl(mat, tolerance);
         }
 
-        template <SizeT A, SizeT B, SizeT C>
-        static MatrixMxN<B, C> Solve(const MatrixMxN<A, B>& mat_a, const MatrixMxN<A, C>& mat_b)
+        template <SizeT Row, SizeT ColA, SizeT ColB>
+        static MatrixMxN<ColA, ColB> Solve(const MatrixMxN<Row, ColA>& mat_a, const MatrixMxN<Row, ColB>& mat_b)
         {
-            return MatrixMxN<A, B>::SolveImpl(mat_a, mat_b);
+            return MatrixMxN<Row, ColA>::SolveImpl(mat_a, mat_b);
         }
 
-        template <SizeT A, SizeT B, SizeT C>
-        static MatrixMxN<A, C> Multiply(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b)
+        template <SizeT RowA, SizeT ColRow, SizeT ColB>
+        static MatrixMxN<RowA, ColB> Multiply(MatrixMxN<RowA, ColRow> mat_a, MatrixMxN<ColRow, ColB> mat_b)
         {
-            return MatrixMxN<A, B>::MultiplyImpl(mat_a, mat_b);
+            return MatrixMxN<RowA, ColRow>::MultiplyImpl(mat_a, mat_b);
+        }
+
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> HadamardProduct(const MatrixMxN<Row, Col>& mat_a, const MatrixMxN<Row, Col>& mat_b)
+        {
+            return MatrixMxN<Row, Col>::HadamardProductImpl(mat_a, mat_b);
+        }
+
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> OuterProduct(const VectorN<Row>& vec_a, const VectorN<Col>& vec_b)
+        {
+            return MatrixMxN<Row, Col>::OuterProductImpl(vec_a, vec_b);
         }
     };
 
@@ -991,6 +1007,36 @@ namespace MatrixLib
         }
 
         return multiplied;
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N> MatrixMxN<M, N>::HadamardProductImpl(const MatrixMxN& mat_a, const MatrixMxN& mat_b)
+    {
+        MatrixMxN hadamard;
+        for (SizeT row = 0; row < M; ++row)
+        {
+            for (SizeT col = 0; col < N; ++col)
+            {
+                hadamard[row][col] = mat_a[row][col] * mat_b[row][col];
+            }
+        }
+
+        return hadamard;
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N> MatrixMxN<M, N>::OuterProductImpl(const VectorN<M>& vec_a, const VectorN<N>& vec_b)
+    {
+        MatrixMxN outer;
+        for (SizeT row = 0; row < M; ++row)
+        {
+            for (SizeT col = 0; col < N; ++col)
+            {
+                outer[row][col] = vec_a[row] * vec_b[col];
+            }
+        }
+
+        return outer;
     }
 
     template <SizeT M, SizeT N>

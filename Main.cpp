@@ -89,5 +89,15 @@ int main()
     b.ClearDigit(5);
     std::cout << "b: " << b << std::endl;
 
+    std::cout << MatrixLib::Matrix::OuterProduct(v7_a, v7_c) << std::endl;
+
+    MatrixLib::MatrixMxN<3, 5> mat_f = {
+        v7_a.Swizzle<5>({ 5, 4, 3, 3, 1 }),
+        v7_a.Swizzle<5>({ 2, 5, 4, 1, 3 }),
+        v7_a.Swizzle<5>({ 4, 1, 2, 2, 0 })
+    };
+
+    std::cout << MatrixLib::Matrix::HadamardProduct(mat_f, mat_d) << std::endl;
+
     return 0;
 }
