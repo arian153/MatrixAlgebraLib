@@ -46,8 +46,6 @@ namespace MatrixLib
         VectorN  operator -() const;
         VectorN& operator +=(const VectorN& rhs);
         VectorN& operator -=(const VectorN& rhs);
-        VectorN& operator +=(Real r);
-        VectorN& operator -=(Real r);
         VectorN& operator *=(Real r);
         VectorN& operator /=(Real r);
 
@@ -58,12 +56,6 @@ namespace MatrixLib
         void Negate();
         void Inverse();
         void Normalize();
-        void Add(const VectorN& v);
-        void Subtract(const VectorN& v);
-        void Add(Real r);
-        void Subtract(Real r);
-        void Multiply(Real r);
-        void Divide(Real r);
         void ClearDigit(SizeT digit);
         void ClearError(Real epsilon);
 
@@ -97,11 +89,7 @@ namespace MatrixLib
         VectorN<M> Swizzle(std::initializer_list<SizeT> indices_list) const;
 
     public: // static methods
-        static SizeT   Dimension();
-        static VectorN ComputeConvexCombination2(const VectorN& a, const VectorN& b, Real u);
-        static VectorN ComputeConvexCombination3(const VectorN& a, const VectorN& b, const VectorN& c, Real u, Real v);
-        template <SizeT K>
-        static VectorN    ComputeConvexCombinationN(std::array<VectorN, K> vectors, std::array<Real, K> params);
+        static SizeT      Dimension();
         static VectorN    Project(const VectorN& project_a, const VectorN& onto_b);
         static Real       Distance(const VectorN& a, const VectorN& b);
         static Real       DistanceSq(const VectorN& a, const VectorN& b);
@@ -115,6 +103,10 @@ namespace MatrixLib
         auto end();
         auto begin() const;
         auto end() const;
+
+    public: // friend    
+        friend class Vector;
+        friend class Matrix;
     };
 
     template <SizeT N>
@@ -241,42 +233,44 @@ namespace MatrixLib
     template <SizeT N>
     VectorN<N>& VectorN<N>::operator+=(const VectorN& rhs)
     {
-        Add(rhs);
+        for (SizeT i = 0; i < N; ++i)
+        {
+            m_elements[i] += rhs.m_elements[i];
+        }
+
         return *this;
     }
 
     template <SizeT N>
     VectorN<N>& VectorN<N>::operator-=(const VectorN& rhs)
     {
-        Subtract(rhs);
-        return *this;
-    }
+        for (SizeT i = 0; i < N; ++i)
+        {
+            m_elements[i] -= rhs.m_elements[i];
+        }
 
-    template <SizeT N>
-    VectorN<N>& VectorN<N>::operator+=(Real r)
-    {
-        Add(r);
-        return *this;
-    }
-
-    template <SizeT N>
-    VectorN<N>& VectorN<N>::operator-=(Real r)
-    {
-        Subtract(r);
         return *this;
     }
 
     template <SizeT N>
     VectorN<N>& VectorN<N>::operator*=(Real r)
     {
-        Multiply(r);
+        for (SizeT i = 0; i < N; ++i)
+        {
+            m_elements[i] *= r;
+        }
+
         return *this;
     }
 
     template <SizeT N>
     VectorN<N>& VectorN<N>::operator/=(Real r)
     {
-        Divide(r);
+        for (SizeT i = 0; i < N; ++i)
+        {
+            m_elements[i] /= r;
+        }
+
         return *this;
     }
 
@@ -320,60 +314,9 @@ namespace MatrixLib
     void VectorN<N>::Normalize()
     {
         Real inv_length = Tools::Inverse(Length());
-        Multiply(inv_length);
-    }
-
-    template <SizeT N>
-    void VectorN<N>::Add(const VectorN& v)
-    {
         for (SizeT i = 0; i < N; ++i)
         {
-            m_elements[i] += v.m_elements[i];
-        }
-    }
-
-    template <SizeT N>
-    void VectorN<N>::Subtract(const VectorN& v)
-    {
-        for (SizeT i = 0; i < N; ++i)
-        {
-            m_elements[i] -= v.m_elements[i];
-        }
-    }
-
-    template <SizeT N>
-    void VectorN<N>::Add(Real r)
-    {
-        for (SizeT i = 0; i < N; ++i)
-        {
-            m_elements[i] += r;
-        }
-    }
-
-    template <SizeT N>
-    void VectorN<N>::Subtract(Real r)
-    {
-        for (SizeT i = 0; i < N; ++i)
-        {
-            m_elements[i] -= r;
-        }
-    }
-
-    template <SizeT N>
-    void VectorN<N>::Multiply(Real r)
-    {
-        for (SizeT i = 0; i < N; ++i)
-        {
-            m_elements[i] *= r;
-        }
-    }
-
-    template <SizeT N>
-    void VectorN<N>::Divide(Real r)
-    {
-        for (SizeT i = 0; i < N; ++i)
-        {
-            m_elements[i] /= r;
+            m_elements[i] *= inv_length;
         }
     }
 
@@ -628,54 +571,6 @@ namespace MatrixLib
     }
 
     template <SizeT N>
-    VectorN<N> VectorN<N>::ComputeConvexCombination2(const VectorN& a, const VectorN& b, Real u)
-    {
-        VectorN computed;
-        Real    v = Constant::ONE - u;
-        for (SizeT i = 0; i < N; ++i)
-        {
-            computed.m_elements[i] = u * a.m_elements[i] + v * b.m_elements[i];
-        }
-
-        return computed;
-    }
-
-    template <SizeT N>
-    VectorN<N> VectorN<N>::ComputeConvexCombination3(const VectorN& a, const VectorN& b, const VectorN& c, Real u, Real v)
-    {
-        VectorN computed;
-        Real    w = Constant::ONE - u - v;
-        for (SizeT i = 0; i < N; ++i)
-        {
-            computed.m_elements[i] = u * a.m_elements[i] + v * b.m_elements[i] + w * c.m_elements[i];
-        }
-
-        return computed;
-    }
-
-    template <SizeT N>
-    template <SizeT K>
-    VectorN<N> VectorN<N>::ComputeConvexCombinationN(std::array<VectorN, K> vectors, std::array<Real, K> params)
-    {
-        VectorN    computed;
-        VectorN<K> convex_params = VectorN<K>(params);
-        Real       norm_one      = convex_params.template Norm<Constant::ONE>();
-        if (Tools::IsEqual(Constant::ONE, norm_one))
-        {
-            for (SizeT i = 0; i < N; ++i)
-            {
-                computed.m_elements[i] = Constant::ZERO;
-                for (SizeT j = 0; j < convex_params.Dimension(); ++j)
-                {
-                    computed.m_elements[i] += convex_params[j] * vectors[j].m_elements[i];
-                }
-            }
-        }
-
-        return computed;
-    }
-
-    template <SizeT N>
     Real VectorN<N>::DotProduct(const VectorN& a, const VectorN& b)
     {
         Real dot = Constant::ZERO;
@@ -771,52 +666,5 @@ namespace MatrixLib
     auto VectorN<N>::end() const
     {
         return m_elements.end();
-    }
-
-    // arithmetic operator
-    template <SizeT N>
-    VectorN<N> operator +(const VectorN<N>& a, const VectorN<N>& b)
-    {
-        return a.Added(b);
-    }
-
-    template <SizeT N>
-    VectorN<N> operator -(const VectorN<N>& a, const VectorN<N>& b)
-    {
-        return a.Subtracted(b);
-    }
-
-    template <SizeT N>
-    VectorN<N> operator *(Real real, const VectorN<N>& vector)
-    {
-        return vector.Multiplied(real);
-    }
-
-    template <SizeT N>
-    VectorN<N> operator *(const VectorN<N>& vector, Real real)
-    {
-        return vector.Multiplied(real);
-    }
-
-    template <SizeT N>
-    VectorN<N> operator /(const VectorN<N>& vector, Real real)
-    {
-        return vector.Divided(real);
-    }
-
-    // IO operator
-    template <SizeT N>
-    std::ostream& operator<<(std::ostream& os, const VectorN<N>& rhs)
-    {
-        os << "{" << rhs[0];
-
-        for (SizeT i = 1; i < N; ++i)
-        {
-            os << ", " << rhs[i];
-        }
-
-        os << "}";
-
-        return os;
     }
 }

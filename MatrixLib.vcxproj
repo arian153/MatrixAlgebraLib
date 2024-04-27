@@ -135,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatrixLib.Math.Constants.h" />
+    <ClInclude Include="MatrixLib.Math.h" />
     <ClInclude Include="MatrixLib.Math.MatrixMxN.h" />
     <ClInclude Include="MatrixLib.Math.VectorN.h" />
   </ItemGroup>

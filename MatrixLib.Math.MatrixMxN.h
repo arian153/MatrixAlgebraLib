@@ -1,6 +1,5 @@
 #pragma once
 #include <array>
-#include <ostream>
 #include <ranges>
 #include <vector>
 
@@ -41,41 +40,43 @@ namespace MatrixLib
         VectorN<N>  operator[](SizeT row) const;
         VectorN<N>& operator[](SizeT row);
 
-        //// assignment operator
-        //MatrixMxN& operator =(const MatrixMxN& rhs);
+        // assignment operator
+        MatrixMxN& operator =(const MatrixMxN& rhs);
+        MatrixMxN& operator =(Real rhs);
 
-        //// compare operator
-        //bool operator ==(const MatrixMxN& rhs) const;
-        //bool operator !=(const MatrixMxN& rhs) const;
+        // compare operator
+        bool operator ==(const MatrixMxN& rhs) const;
+        bool operator !=(const MatrixMxN& rhs) const;
 
-        //// arithmetic operator
-        //MatrixMxN  operator -() const;
-        //MatrixMxN& operator +=(const MatrixMxN& rhs);
-        //MatrixMxN& operator -=(const MatrixMxN& rhs);
-        //MatrixMxN& operator *=(Real r);
-        //MatrixMxN& operator /=(Real r);
+        // arithmetic operator
+        MatrixMxN  operator -() const;
+        MatrixMxN& operator +=(const MatrixMxN& rhs);
+        MatrixMxN& operator -=(const MatrixMxN& rhs);
+        MatrixMxN& operator *=(Real r);
+        MatrixMxN& operator /=(Real r);
 
     public: // modify methods
         void Set(const MatrixMxN& mat);
         void SetRow(SizeT row, VectorN<N> row_vector);
         void SetColumn(SizeT col, VectorN<M> column_vector);
-        void Add(const MatrixMxN& v);
-        void Subtract(const MatrixMxN& v);
-        void Multiply(Real r);
-        void Divide(Real r);
         void Negate();
         void ClearDigit(SizeT digit);
         void ClearError(Real epsilon);
 
-        //TODO
-        //void Inverse();
-        //void Transpose();
-
-        //Real Determinant() const;
+    public:
+        bool            IsEqual(const MatrixMxN& v) const;
+        bool            IsNotEqual(const MatrixMxN& v) const;
+        bool            IsZero() const;
+        bool            IsIdentity() const;
+        bool            IsInvertible() const;
+        SizeT           Rank() const;
+        Real            Trace() const;
+        Real            Determinant() const;
         VectorN<N>      Row(SizeT row) const;
         VectorN<M>      Column(SizeT col) const;
-        MatrixMxN<N, M> Invert() const;
-        //MatrixMxN<N, M> Transpose() const;
+        MatrixMxN<N, M> Invert(bool use_permute = true, Real tolerance = Constant::EPSILON) const;
+        MatrixMxN<N, M> Transposed() const;
+        MatrixMxN       Negated() const;
 
     public: // range based for loop related methods
         auto begin();
@@ -94,12 +95,8 @@ namespace MatrixLib
         static MatrixMxN<B, C> SolveImpl(const MatrixMxN<A, B>& mat_a, const MatrixMxN<A, C>& mat_b);
 
         template <SizeT A, SizeT B, SizeT C>
-        static MatrixMxN<A, C> MultiplyImpl(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b);
-
-        // Trace // https://en.wikipedia.org/wiki/Trace_(linear_algebra)
-        // Adjugate // https://en.wikipedia.org/wiki/Adjugate_matrix
-        // Cofactor // https://en.wikipedia.org/wiki/Minor_(linear_algebra)
-        // Hadamard Product
+        static MatrixMxN<A, C>         MultiplyImpl(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b);
+        static MatrixMxN<M - 1, N - 1> MinorMatrixImpl(const MatrixMxN& input_mat_g, SizeT row, SizeT col);
 
         static MatrixMxN HadamardProductImpl(const MatrixMxN& mat_a, const MatrixMxN& mat_b);
         static MatrixMxN OuterProductImpl(const VectorN<M>& vec_a, const VectorN<N>& vec_b);
@@ -195,64 +192,7 @@ namespace MatrixLib
 
     public: // friend
         friend class Matrix;
-    };
-
-    class Matrix
-    {
-    public:
-        template <SizeT Row, SizeT Col>
-        static MatrixMxN<Col, Row> Transpose(const MatrixMxN<Row, Col>& mat)
-        {
-            return MatrixMxN<Row, Col>::TransposeImpl(mat);
-        }
-
-        template <SizeT Row, SizeT Col>
-        static SizeT Rank(const MatrixMxN<Row, Col>& mat, Real tolerance = Constant::EPSILON)
-        {
-            return MatrixMxN<Row, Col>::RankImpl(mat, tolerance);
-        }
-
-        template <SizeT Row, SizeT Col>
-        static Real Determinant(const MatrixMxN<Row, Col>& mat)
-        {
-            return MatrixMxN<Row, Col>::DeterminantImpl(mat);
-        }
-
-        template <SizeT Row, SizeT Col>
-        static MatrixMxN<Row, Col> Inverse(const MatrixMxN<Row, Col>& mat, bool use_permute = true)
-        {
-            return MatrixMxN<Row, Col>::InverseImpl(mat, use_permute);
-        }
-
-        template <SizeT Row, SizeT Col>
-        static MatrixMxN<Col, Row> PseudoInverse(const MatrixMxN<Row, Col>& mat, Real tolerance = Constant::EPSILON)
-        {
-            return MatrixMxN<Row, Col>::PseudoInverseImpl(mat, tolerance);
-        }
-
-        template <SizeT Row, SizeT ColA, SizeT ColB>
-        static MatrixMxN<ColA, ColB> Solve(const MatrixMxN<Row, ColA>& mat_a, const MatrixMxN<Row, ColB>& mat_b)
-        {
-            return MatrixMxN<Row, ColA>::SolveImpl(mat_a, mat_b);
-        }
-
-        template <SizeT RowA, SizeT ColRow, SizeT ColB>
-        static MatrixMxN<RowA, ColB> Multiply(MatrixMxN<RowA, ColRow> mat_a, MatrixMxN<ColRow, ColB> mat_b)
-        {
-            return MatrixMxN<RowA, ColRow>::MultiplyImpl(mat_a, mat_b);
-        }
-
-        template <SizeT Row, SizeT Col>
-        static MatrixMxN<Row, Col> HadamardProduct(const MatrixMxN<Row, Col>& mat_a, const MatrixMxN<Row, Col>& mat_b)
-        {
-            return MatrixMxN<Row, Col>::HadamardProductImpl(mat_a, mat_b);
-        }
-
-        template <SizeT Row, SizeT Col>
-        static MatrixMxN<Row, Col> OuterProduct(const VectorN<Row>& vec_a, const VectorN<Col>& vec_b)
-        {
-            return MatrixMxN<Row, Col>::OuterProductImpl(vec_a, vec_b);
-        }
+        friend class Vector;
     };
 
     template <SizeT M, SizeT N>
@@ -418,6 +358,85 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
+    MatrixMxN<M, N>& MatrixMxN<M, N>::operator=(const MatrixMxN& rhs)
+    {
+        if (this != &rhs)
+            Set(rhs);
+
+        return *this;
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N>& MatrixMxN<M, N>::operator=(Real rhs)
+    {
+        m_elements.fill(VectorN<N>(rhs));
+
+        return *this;
+    }
+
+    template <SizeT M, SizeT N>
+    bool MatrixMxN<M, N>::operator==(const MatrixMxN& rhs) const
+    {
+        return IsEqual(rhs);
+    }
+
+    template <SizeT M, SizeT N>
+    bool MatrixMxN<M, N>::operator!=(const MatrixMxN& rhs) const
+    {
+        return IsNotEqual(rhs);
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N> MatrixMxN<M, N>::operator-() const
+    {
+        return Negated();
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N>& MatrixMxN<M, N>::operator+=(const MatrixMxN& rhs)
+    {
+        for (SizeT row = 0; row < M; ++row)
+        {
+            m_elements[row] += rhs[row];
+        }
+
+        return *this;
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N>& MatrixMxN<M, N>::operator-=(const MatrixMxN& rhs)
+    {
+        for (SizeT row = 0; row < M; ++row)
+        {
+            m_elements[row] -= rhs[row];
+        }
+
+        return *this;
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N>& MatrixMxN<M, N>::operator*=(Real r)
+    {
+        for (SizeT row = 0; row < M; ++row)
+        {
+            m_elements[row] *= r;
+        }
+
+        return *this;
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N>& MatrixMxN<M, N>::operator/=(Real r)
+    {
+        for (SizeT row = 0; row < M; ++row)
+        {
+            m_elements[row] /= r;
+        }
+
+        return *this;
+    }
+
+    template <SizeT M, SizeT N>
     void MatrixMxN<M, N>::Set(const MatrixMxN& mat)
     {
         m_elements = mat.m_elements;
@@ -435,42 +454,6 @@ namespace MatrixLib
         for (SizeT row = 0; row < M; ++row)
         {
             m_elements[row][col] = column_vector[row];
-        }
-    }
-
-    template <SizeT M, SizeT N>
-    void MatrixMxN<M, N>::Add(const MatrixMxN& v)
-    {
-        for (SizeT row = 0; row < M; ++row)
-        {
-            m_elements[row] += v(row);
-        }
-    }
-
-    template <SizeT M, SizeT N>
-    void MatrixMxN<M, N>::Subtract(const MatrixMxN& v)
-    {
-        for (SizeT row = 0; row < M; ++row)
-        {
-            m_elements[row] -= v(row);
-        }
-    }
-
-    template <SizeT M, SizeT N>
-    void MatrixMxN<M, N>::Multiply(Real r)
-    {
-        for (SizeT row = 0; row < M; ++row)
-        {
-            m_elements[row] *= r;
-        }
-    }
-
-    template <SizeT M, SizeT N>
-    void MatrixMxN<M, N>::Divide(Real r)
-    {
-        for (SizeT row = 0; row < M; ++row)
-        {
-            m_elements[row] /= r;
         }
     }
 
@@ -502,6 +485,97 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
+    bool MatrixMxN<M, N>::IsEqual(const MatrixMxN& v) const
+    {
+        for (SizeT i = 0; i < M; ++i)
+        {
+            if (!Tools::IsEqual(m_elements[i], v.m_elements[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    template <SizeT M, SizeT N>
+    bool MatrixMxN<M, N>::IsNotEqual(const MatrixMxN& v) const
+    {
+        for (SizeT i = 0; i < M; ++i)
+        {
+            if (!Tools::IsEqual(m_elements[i], v.m_elements[i]))
+                return true;
+        }
+
+        return false;
+    }
+
+    template <SizeT M, SizeT N>
+    bool MatrixMxN<M, N>::IsZero() const
+    {
+        for (SizeT i = 0; i < M; ++i)
+        {
+            if (!Tools::IsZero(m_elements[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    template <SizeT M, SizeT N>
+    bool MatrixMxN<M, N>::IsIdentity() const
+    {
+        for (SizeT row = 0; row < M; ++row)
+        {
+            for (SizeT col = 0; col < N; ++col)
+            {
+                if (row == col && !Tools::IsEqual(m_elements[row][col], Constant::ONE))
+                {
+                    return false;
+                }
+
+                if (!Tools::IsZero(m_elements[row][col]))
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    template <SizeT M, SizeT N>
+    bool MatrixMxN<M, N>::IsInvertible() const
+    {
+        return !Tools::IsZero(Determinant());
+    }
+
+    template <SizeT M, SizeT N>
+    SizeT MatrixMxN<M, N>::Rank() const
+    {
+        return RankImpl(*this);
+    }
+
+    template <SizeT M, SizeT N>
+    Real MatrixMxN<M, N>::Trace() const
+    {
+        // https://en.wikipedia.org/wiki/Trace_(linear_algebra)
+
+        Real trace = Constant::ZERO;
+        if constexpr (M == N)
+        {
+            for (SizeT i = 0; i < M; ++i)
+            {
+                trace += m_elements[i][i];
+            }
+        }
+
+        return trace;
+    }
+
+    template <SizeT M, SizeT N>
+    Real MatrixMxN<M, N>::Determinant() const
+    {
+        return DeterminantImpl(*this);
+    }
+
+    template <SizeT M, SizeT N>
     VectorN<N> MatrixMxN<M, N>::Row(SizeT row) const
     {
         return m_elements[row];
@@ -520,12 +594,30 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
-    MatrixMxN<N, M> MatrixMxN<M, N>::Invert() const
+    MatrixMxN<N, M> MatrixMxN<M, N>::Invert(bool use_permute, Real tolerance) const
     {
         if constexpr (M == N)
-            return Matrix::Inverse(this);
+            return InverseImpl(*this, use_permute);
+        else
+            return PseudoInverseImpl(*this, tolerance);
+    }
 
-        return Matrix::PseudoInverse(this);
+    template <SizeT M, SizeT N>
+    MatrixMxN<N, M> MatrixMxN<M, N>::Transposed() const
+    {
+        return TransposeImpl(*this);
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M, N> MatrixMxN<M, N>::Negated() const
+    {
+        MatrixMxN negated;
+        for (SizeT i = 0; i < N; ++i)
+        {
+            negated.m_elements[i] = -m_elements[i];
+        }
+
+        return negated;
     }
 
     template <SizeT M, SizeT N>
@@ -962,7 +1054,8 @@ namespace MatrixLib
         // Generalized inverse
         MatrixFxF             mat_l_transposed = MatrixFxF::Transpose(mat_l);
         MatrixFxF             mat_lt_l         = MatrixFxF::Multiply(mat_l_transposed, mat_l);
-        MatrixMxN<size, size> mat_inv_lt_l     = Matrix::Inverse(mat_lt_l.template ToMatrixMxN<size, size>(), false);
+        MatrixMxN<size, size> mat_lt_l_fixed   = mat_lt_l.template ToMatrixMxN<size, size>();
+        MatrixMxN<size, size> mat_inv_lt_l     = mat_lt_l_fixed.Invert(false);
 
         // M = inv(Lt * L)
         MatrixFxF mat_m(mat_inv_lt_l);
@@ -988,8 +1081,8 @@ namespace MatrixLib
     {
         // Solve A * x = b;
         // x = A^-1 * b;
-        MatrixMxN<B, A> inv_a = Matrix::PseudoInverse(mat_a);
-        MatrixMxN<B, C> x     = Matrix::Multiply(inv_a, mat_b);
+        MatrixMxN<B, A> inv_a = MatrixMxN::PseudoInverseImpl(mat_a, Constant::EPSILON);
+        MatrixMxN<B, C> x     = MatrixMxN::MultiplyImpl(inv_a, mat_b);
         return x;
     }
 
@@ -1007,6 +1100,40 @@ namespace MatrixLib
         }
 
         return multiplied;
+    }
+
+    template <SizeT M, SizeT N>
+    MatrixMxN<M - 1, N - 1> MatrixMxN<M, N>::MinorMatrixImpl(const MatrixMxN& input_mat_g, SizeT row, SizeT col)
+    {
+        // https://en.wikipedia.org/wiki/Minor_(linear_algebra)
+        MatrixMxN<M - 1, N - 1> minor;
+        for (SizeT i = 0; i < M; ++i)
+        {
+            SizeT mi = i - row;
+            if (mi == 0)
+            {
+                // skip this row
+                continue;
+            }
+
+            SizeT minor_i = 0 < mi && mi < M ? i - 1 : i;
+
+            for (SizeT j = 0; j < N; ++j)
+            {
+                SizeT mj = j - col;
+                if (mj == 0)
+                {
+                    // skip this col
+                    continue;
+                }
+
+                SizeT minor_j = 0 < mj && mj < N ? j - 1 : j;
+
+                minor[minor_i][minor_j] = input_mat_g[i][j];
+            }
+        }
+
+        return minor;
     }
 
     template <SizeT M, SizeT N>
@@ -1061,18 +1188,5 @@ namespace MatrixLib
     auto MatrixMxN<M, N>::end() const
     {
         return m_elements.end();
-    }
-
-    // IO operator
-    template <SizeT M, SizeT N>
-    std::ostream& operator<<(std::ostream& os, const MatrixMxN<M, N>& rhs)
-    {
-        os << "{\n " << rhs[0];
-        for (SizeT i = 1; i < M; ++i)
-        {
-            os << ",\n " << rhs[i];
-        }
-        os << "\n}";
-        return os;
     }
 }

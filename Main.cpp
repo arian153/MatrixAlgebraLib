@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "MatrixLib.Math.MatrixMxN.h"
-#include "MatrixLib.Math.VectorN.h"
+#include "MatrixLib.Math.h"
+
 
 int main()
 {
@@ -44,6 +44,10 @@ int main()
     auto inv_a = MatrixLib::Matrix::Inverse(mat_a);
     std::cout << "inv_a: " << inv_a << std::endl;
 
+    std::cout << "cofactor: " << MatrixLib::Matrix::CofactorMatrix(mat_a) << std::endl;
+    std::cout << "adjugate: " << MatrixLib::Matrix::AdjugateMatrix(mat_a) << std::endl;
+
+    
     auto mul_a = MatrixLib::Matrix::Multiply(mat_a, inv_a);
     mul_a.ClearDigit(5);
     std::cout << "mul_a: " << mul_a << std::endl;
@@ -98,6 +102,12 @@ int main()
     };
 
     std::cout << MatrixLib::Matrix::HadamardProduct(mat_f, mat_d) << std::endl;
+
+    std::cout << mat_f << std::endl;
+    std::cout << MatrixLib::Matrix::MinorMatrix(mat_f, 0, 0) << std::endl;
+    std::cout << MatrixLib::Matrix::MinorMatrix(mat_f, 2, 1) << std::endl;
+
+
 
     return 0;
 }

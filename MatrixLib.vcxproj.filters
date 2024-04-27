@@ -29,6 +29,9 @@
     <ClInclude Include="MatrixLib.Math.MatrixMxN.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MatrixLib.Math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="MatrixLib.Math.Tools.h">
