@@ -68,35 +68,24 @@ namespace MatrixLib
         VectorN Negated() const;
         VectorN Invert() const;
         VectorN Normalized() const;
-        VectorN Added(const VectorN& v) const;
-        VectorN Subtracted(const VectorN& v) const;
-        VectorN Multiplied(Real r) const;
-        VectorN Divided(Real r) const;
-
-    public: // compute methods 
+        VectorN Scaled(Real r) const;
         Real    Length() const;
         Real    LengthSq() const;
         SizeT   SmallestIdx() const;
         SizeT   LargestIdx() const;
         VectorN Half() const;
         VectorN Absolute() const;
+        Real    Norm(Real p) const;
 
     public: // template methods
-        template <Real P>
-        Real Norm() const;
-
         template <SizeT M>
         VectorN<M> Swizzle(std::initializer_list<SizeT> indices_list) const;
 
-    public: // static methods
-        static SizeT      Dimension();
-        static VectorN    Project(const VectorN& project_a, const VectorN& onto_b);
-        static Real       Distance(const VectorN& a, const VectorN& b);
-        static Real       DistanceSq(const VectorN& a, const VectorN& b);
-        static Real       DotProduct(const VectorN& a, const VectorN& b);
-        static VectorN    HadamardProduct(const VectorN& a, const VectorN& b);
-        static VectorN<3> CrossProduct(const VectorN<3>& a, const VectorN<3>& b);
-        static VectorN<7> CrossProduct(const VectorN<7>& a, const VectorN<7>& b);
+    private: // static methods
+        static Real       DotProductImpl(const VectorN& a, const VectorN& b);
+        static VectorN    HadamardProductImpl(const VectorN& a, const VectorN& b);
+        static VectorN<3> CrossProductImpl(const VectorN<3>& a, const VectorN<3>& b);
+        static VectorN<7> CrossProductImpl(const VectorN<7>& a, const VectorN<7>& b);
 
     public: // range based for loop related methods
         auto begin();
@@ -422,31 +411,7 @@ namespace MatrixLib
     }
 
     template <SizeT N>
-    VectorN<N> VectorN<N>::Added(const VectorN& v) const
-    {
-        VectorN added;
-        for (SizeT i = 0; i < N; ++i)
-        {
-            added.m_elements[i] = m_elements[i] + v.m_elements[i];
-        }
-
-        return added;
-    }
-
-    template <SizeT N>
-    VectorN<N> VectorN<N>::Subtracted(const VectorN& v) const
-    {
-        VectorN subtracted;
-        for (SizeT i = 0; i < N; ++i)
-        {
-            subtracted.m_elements[i] = m_elements[i] - v.m_elements[i];
-        }
-
-        return subtracted;
-    }
-
-    template <SizeT N>
-    VectorN<N> VectorN<N>::Multiplied(Real r) const
+    VectorN<N> VectorN<N>::Scaled(Real r) const
     {
         VectorN multiplied;
         for (SizeT i = 0; i < N; ++i)
@@ -455,18 +420,6 @@ namespace MatrixLib
         }
 
         return multiplied;
-    }
-
-    template <SizeT N>
-    VectorN<N> VectorN<N>::Divided(Real r) const
-    {
-        VectorN divided;
-        for (SizeT i = 0; i < N; ++i)
-        {
-            divided.m_elements[i] = m_elements[i] / r;
-        }
-
-        return divided;
     }
 
     template <SizeT N>
@@ -538,16 +491,15 @@ namespace MatrixLib
     }
 
     template <SizeT N>
-    template <Real P>
-    Real VectorN<N>::Norm() const
+    Real VectorN<N>::Norm(Real p) const
     {
         Real sum = Constant::ZERO;
         for (SizeT i = 0; i < N; ++i)
         {
-            sum += Tools::Pow(Tools::Abs(m_elements[i]), P);
+            sum += Tools::Pow(Tools::Abs(m_elements[i]), p);
         }
 
-        return Tools::Pow(sum, Tools::Inverse(P));
+        return Tools::Pow(sum, Tools::Inverse(p));
     }
 
     template <SizeT N>
@@ -565,13 +517,7 @@ namespace MatrixLib
     }
 
     template <SizeT N>
-    SizeT VectorN<N>::Dimension()
-    {
-        return N;
-    }
-
-    template <SizeT N>
-    Real VectorN<N>::DotProduct(const VectorN& a, const VectorN& b)
+    Real VectorN<N>::DotProductImpl(const VectorN& a, const VectorN& b)
     {
         Real dot = Constant::ZERO;
         for (SizeT i = 0; i < N; ++i)
@@ -583,25 +529,7 @@ namespace MatrixLib
     }
 
     template <SizeT N>
-    VectorN<N> VectorN<N>::Project(const VectorN& project_a, const VectorN& onto_b)
-    {
-        return (DotProduct(project_a, onto_b) / DotProduct(onto_b, onto_b)) * onto_b;
-    }
-
-    template <SizeT N>
-    Real VectorN<N>::Distance(const VectorN& a, const VectorN& b)
-    {
-        return b.Subtracted(a).Length();
-    }
-
-    template <SizeT N>
-    Real VectorN<N>::DistanceSq(const VectorN& a, const VectorN& b)
-    {
-        return b.Subtracted(a).LengthSq();
-    }
-
-    template <SizeT N>
-    VectorN<N> VectorN<N>::HadamardProduct(const VectorN& a, const VectorN& b)
+    VectorN<N> VectorN<N>::HadamardProductImpl(const VectorN& a, const VectorN& b)
     {
         VectorN hadamard;
         for (SizeT i = 0; i < N; ++i)
@@ -612,7 +540,7 @@ namespace MatrixLib
         return hadamard;
     }
 
-    inline VectorN<3> VectorN<3>::CrossProduct(const VectorN& a, const VectorN& b)
+    inline VectorN<3> VectorN<3>::CrossProductImpl(const VectorN& a, const VectorN& b)
     {
         VectorN cross;
         cross[0] = a[1] * b[2] - a[2] * b[1];
@@ -622,7 +550,7 @@ namespace MatrixLib
         return cross;
     }
 
-    inline VectorN<7> VectorN<7>::CrossProduct(const VectorN& a, const VectorN& b)
+    inline VectorN<7> VectorN<7>::CrossProductImpl(const VectorN& a, const VectorN& b)
     {
         VectorN cross;
         for (SizeT i = 0; i < 7; ++i)

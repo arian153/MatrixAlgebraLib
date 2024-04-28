@@ -5,22 +5,181 @@
 #include "MatrixLib.Math.MatrixMxN.h"
 #include "MatrixLib.Math.VectorN.h"
 
+// global vector static methods 
+namespace MatrixLib
+{
+    class Vector
+    {
+    public:
+        template <SizeT N>
+        const inline static VectorN<N> ZERO = VectorN<N>(Constant::ZERO);
+
+        template <SizeT N>
+        const inline static VectorN<N> X_AXIS = VectorN<N>({ Constant::ONE });
+
+        template <SizeT N>
+        const inline static VectorN<N> Y_AXIS = VectorN<N>({ Constant::ZERO, Constant::ONE });
+
+        template <SizeT N>
+        const inline static VectorN<N> Z_AXIS = VectorN<N>({ Constant::ZERO, Constant::ZERO, Constant::ONE });
+
+        template <SizeT N>
+        const inline static VectorN<N> W_AXIS = VectorN<N>({ Constant::ZERO, Constant::ZERO, Constant::ZERO, Constant::ONE });
+
+    public:
+        template <SizeT N>
+        static Real DotProduct(const VectorN<N>& a, const VectorN<N>& b)
+        {
+            return VectorN<N>::DotProductImpl(a, b);
+        }
+
+        template <SizeT N>
+        static VectorN<N> HadamardProduct(const VectorN<N>& a, const VectorN<N>& b)
+        {
+            return VectorN<N>::HadamardProductImpl(a, b);
+        }
+
+        static VectorN<3> CrossProduct(const VectorN<3>& a, const VectorN<3>& b)
+        {
+            return VectorN<3>::CrossProductImpl(a, b);
+        }
+
+        static VectorN<7> CrossProduct(const VectorN<7>& a, const VectorN<7>& b)
+        {
+            return VectorN<7>::CrossProductImpl(a, b);
+        }
+
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> OuterProduct(const VectorN<Row>& vec_a, const VectorN<Col>& vec_b)
+        {
+            return MatrixMxN<Row, Col>::OuterProductImpl(vec_a, vec_b);
+        }
+
+        template <SizeT N>
+        static VectorN<N> Project(const VectorN<N>& project_a, const VectorN<N>& onto_b)
+        {
+            return (Vector::DotProduct(project_a, onto_b) / Vector::DotProduct(onto_b, onto_b)) * onto_b;
+        }
+
+        template <SizeT N>
+        static Real Distance(const VectorN<N>& a, const VectorN<N>& b)
+        {
+            return (b - a).Length();
+        }
+
+        template <SizeT N>
+        static Real DistanceSq(const VectorN<N>& a, const VectorN<N>& b)
+        {
+            return (b - a).LengthSq();
+        }
+    };
+}
+
+// global matrix static methods 
 namespace MatrixLib
 {
     class Matrix
     {
     public:
-        // Add
-        // Subtract
-        // Multiply
-        // Divide
-        // Negate
-        // Clear
+
+    public:
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> Add(const MatrixMxN<Row, Col>& mat_a, const MatrixMxN<Row, Col>& mat_b)
+        {
+            MatrixMxN<Row, Col> added;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                added[row] = mat_a[row] + mat_b[row];
+            }
+
+            return added;
+        }
+
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> Subtract(const MatrixMxN<Row, Col>& mat_a, const MatrixMxN<Row, Col>& mat_b)
+        {
+            MatrixMxN<Row, Col> subtracted;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                subtracted[row] = mat_a[row] - mat_b[row];
+            }
+
+            return subtracted;
+        }
+
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> Multiply(const MatrixMxN<Row, Col>& mat, Real r)
+        {
+            MatrixMxN<Row, Col> multiplied;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                multiplied[row] = mat[row] * r;
+            }
+
+            return multiplied;
+        }
+
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> Multiply(Real r, const MatrixMxN<Row, Col>& mat)
+        {
+            MatrixMxN<Row, Col> multiplied;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                multiplied[row] = mat[row] * r;
+            }
+
+            return multiplied;
+        }
+
+        template <SizeT Row, SizeT Col>
+        static VectorN<Row> Multiply(const MatrixMxN<Row, Col>& mat, const VectorN<Col>& vec)
+        {
+            VectorN<Row> multiplied;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                multiplied[row] = Vector::DotProduct(mat[row], vec);
+            }
+
+            return multiplied;
+        }
+
+        template <SizeT Row, SizeT Col>
+        static VectorN<Col> Multiply(const VectorN<Row>& vec, const MatrixMxN<Row, Col>& mat)
+        {
+            VectorN<Col> multiplied;
+            for (SizeT col = 0; col < Col; ++col)
+            {
+                multiplied[col] = Vector::DotProduct(vec, mat.Column(col));
+            }
+
+            return multiplied;
+        }
 
         template <SizeT RowA, SizeT ColRow, SizeT ColB>
         static MatrixMxN<RowA, ColB> Multiply(MatrixMxN<RowA, ColRow> mat_a, MatrixMxN<ColRow, ColB> mat_b)
         {
-            return MatrixMxN<RowA, ColRow>::MultiplyImpl(mat_a, mat_b);
+            MatrixMxN<RowA, ColB> multiplied;
+            for (SizeT row = 0; row < RowA; ++row)
+            {
+                for (SizeT col = 0; col < ColB; ++col)
+                {
+                    multiplied(row, col) = Vector::DotProduct(mat_a.Row(row), mat_b.Column(col));
+                }
+            }
+
+            return multiplied;
+        }
+
+        template <SizeT Row, SizeT Col>
+        static MatrixMxN<Row, Col> Divide(const MatrixMxN<Row, Col>& mat, Real r)
+        {
+            MatrixMxN<Row, Col> divided;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                divided[row] = mat[row] * Tools::Inverse(r);
+            }
+
+            return divided;
         }
 
         template <SizeT Row, SizeT Col>
@@ -99,58 +258,174 @@ namespace MatrixLib
             return cofactor;
         }
     };
+}
 
-    class Vector
-    {
-    public:
-        //template <SizeT N>
-
-        // Add
-        // Subtract
-        // Multiply
-        // Divide
-        // Negate
-        // Project
-        // Distance
-        // DistanceSq
-        // DotProduct
-        // HadamardProduct
-        // CrossProduct
-        // Norm
-    };
-
-    // global arithmetic operators
+// global arithmetic operators
+namespace MatrixLib
+{
     template <SizeT N>
     VectorN<N> operator +(const VectorN<N>& a, const VectorN<N>& b)
     {
-        return a.Added(b);
+        VectorN<N> added;
+        for (SizeT i = 0; i < N; ++i)
+        {
+            added[i] = a[i] + b[i];
+        }
+
+        return added;
     }
 
     template <SizeT N>
     VectorN<N> operator -(const VectorN<N>& a, const VectorN<N>& b)
     {
-        return a.Subtracted(b);
+        VectorN<N> subtracted;
+        for (SizeT i = 0; i < N; ++i)
+        {
+            subtracted[i] = a[i] - b[i];
+        }
+
+        return subtracted;
     }
 
     template <SizeT N>
     VectorN<N> operator *(Real real, const VectorN<N>& vector)
     {
-        return vector.Multiplied(real);
+        VectorN<N> multiplied;
+        for (SizeT i = 0; i < N; ++i)
+        {
+            multiplied[i] = vector[i] * real;
+        }
+
+        return multiplied;
     }
 
     template <SizeT N>
     VectorN<N> operator *(const VectorN<N>& vector, Real real)
     {
-        return vector.Multiplied(real);
+        VectorN<N> multiplied;
+        for (SizeT i = 0; i < N; ++i)
+        {
+            multiplied[i] = vector[i] * real;
+        }
+
+        return multiplied;
     }
 
     template <SizeT N>
     VectorN<N> operator /(const VectorN<N>& vector, Real real)
     {
-        return vector.Divided(real);
+        VectorN<N> multiplied;
+        for (SizeT i = 0; i < N; ++i)
+        {
+            multiplied[i] = vector[i] * Tools::Inverse(real);
+        }
+
+        return multiplied;
     }
 
-    // global IO operators
+    template <SizeT Row, SizeT Col>
+    MatrixMxN<Row, Col> operator +(const MatrixMxN<Row, Col>& a, const MatrixMxN<Row, Col>& b)
+    {
+        MatrixMxN<Row, Col> added;
+        for (SizeT row = 0; row < Row; ++row)
+        {
+            added[row] = a[row] + b[row];
+        }
+
+        return added;
+    }
+
+    template <SizeT Row, SizeT Col>
+    MatrixMxN<Row, Col> operator -(const MatrixMxN<Row, Col>& a, const MatrixMxN<Row, Col>& b)
+    {
+        MatrixMxN<Row, Col> subtracted;
+        for (SizeT row = 0; row < Row; ++row)
+        {
+            subtracted[row] = a[row] - b[row];
+        }
+
+        return subtracted;
+    }
+
+    template <SizeT Row, SizeT Col>
+    static MatrixMxN<Row, Col> operator *(const MatrixMxN<Row, Col>& mat, Real r)
+    {
+        MatrixMxN<Row, Col> multiplied;
+        for (SizeT row = 0; row < Row; ++row)
+        {
+            multiplied[row] = mat[row] * r;
+        }
+
+        return multiplied;
+    }
+
+    template <SizeT Row, SizeT Col>
+    static MatrixMxN<Row, Col> operator *(Real r, const MatrixMxN<Row, Col>& mat)
+    {
+        MatrixMxN<Row, Col> multiplied;
+        for (SizeT row = 0; row < Row; ++row)
+        {
+            multiplied[row] = mat[row] * r;
+        }
+
+        return multiplied;
+    }
+
+    template <SizeT Row, SizeT Col>
+    static VectorN<Row> operator *(const MatrixMxN<Row, Col>& mat, const VectorN<Col>& vec)
+    {
+        VectorN<Row> multiplied;
+        for (SizeT row = 0; row < Row; ++row)
+        {
+            multiplied[row] = Vector::DotProduct(mat[row], vec);
+        }
+
+        return multiplied;
+    }
+
+    template <SizeT Row, SizeT Col>
+    static VectorN<Col> operator *(const VectorN<Row>& vec, const MatrixMxN<Row, Col>& mat)
+    {
+        VectorN<Col> multiplied;
+        for (SizeT col = 0; col < Col; ++col)
+        {
+            multiplied[col] = Vector::DotProduct(vec, mat.Column(col));
+        }
+
+        return multiplied;
+    }
+
+    template <SizeT RowA, SizeT ColRow, SizeT ColB>
+    static MatrixMxN<RowA, ColB> operator *(MatrixMxN<RowA, ColRow> mat_a, MatrixMxN<ColRow, ColB> mat_b)
+    {
+        MatrixMxN<RowA, ColB> multiplied;
+        for (SizeT row = 0; row < RowA; ++row)
+        {
+            for (SizeT col = 0; col < ColB; ++col)
+            {
+                multiplied(row, col) = Vector::DotProduct(mat_a.Row(row), mat_b.Column(col));
+            }
+        }
+
+        return multiplied;
+    }
+
+    template <SizeT Row, SizeT Col>
+    static MatrixMxN<Row, Col> operator /(const MatrixMxN<Row, Col>& mat, Real r)
+    {
+        MatrixMxN<Row, Col> divided;
+        for (SizeT row = 0; row < Row; ++row)
+        {
+            divided[row] = mat[row] * Tools::Inverse(r);
+        }
+
+        return divided;
+    }
+}
+
+// global IO operators
+namespace MatrixLib
+{
     template <SizeT N>
     std::ostream& operator<<(std::ostream& os, const VectorN<N>& rhs)
     {

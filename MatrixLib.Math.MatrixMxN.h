@@ -1095,7 +1095,14 @@ namespace MatrixLib
         {
             for (SizeT col = 0; col < C; ++col)
             {
-                multiplied(row, col) = VectorN<B>::DotProduct(mat_a.Row(row), mat_b.Column(col));
+                multiplied(row, col) = Constant::ZERO;
+                VectorN<B> row_vec   = mat_a.Row(row);
+                VectorN<B> col_vec   = mat_b.Column(col);
+
+                for (SizeT i = 0; i < B; ++i)
+                {
+                    multiplied(row, col) += row_vec[i] * col_vec[i];
+                }
             }
         }
 

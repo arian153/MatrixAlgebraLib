@@ -2,7 +2,6 @@
 
 #include "MatrixLib.Math.h"
 
-
 int main()
 {
     std::cout << "Matrix Lib!\n";
@@ -22,7 +21,7 @@ int main()
 
     std::cout << v7_b - v7_a << std::endl;
 
-    std::cout << MatrixLib::VectorN<7>::CrossProduct(v7_a, v7_b) << std::endl;
+    std::cout << MatrixLib::Vector::CrossProduct(v7_a, v7_b) << std::endl;
 
     //v7_a.Normalize();
     auto v4_a = v7_a.Swizzle<4>({ 4, 4, 3 });
@@ -47,7 +46,6 @@ int main()
     std::cout << "cofactor: " << MatrixLib::Matrix::CofactorMatrix(mat_a) << std::endl;
     std::cout << "adjugate: " << MatrixLib::Matrix::AdjugateMatrix(mat_a) << std::endl;
 
-    
     auto mul_a = MatrixLib::Matrix::Multiply(mat_a, inv_a);
     mul_a.ClearDigit(5);
     std::cout << "mul_a: " << mul_a << std::endl;
@@ -107,6 +105,29 @@ int main()
     std::cout << MatrixLib::Matrix::MinorMatrix(mat_f, 0, 0) << std::endl;
     std::cout << MatrixLib::Matrix::MinorMatrix(mat_f, 2, 1) << std::endl;
 
+    MatrixLib::MatrixMxN<1, 5> mat_15 = {
+        v7_a.Swizzle<5>({ 5, 4, 3, 3, 1 })
+    };
+
+    MatrixLib::MatrixMxN<5, 3> mat_55 = {
+        v7_a.Swizzle<3>({ 2, 5, 4, 1, 3 }),
+        v7_a.Swizzle<3>({ 4, 1, 2, 2, 0 }),
+        v7_a.Swizzle<3>({ 5, 4, 3, 3, 1 }),
+        v7_a.Swizzle<3>({ 2, 1, 6, 0, 3 }),
+        v7_a.Swizzle<3>({ 0, 1, 2, 4, 5 })
+    };
+
+
+    std::cout << "row vec * mat" << std::endl;
+
+    std::cout <<  MatrixLib::Matrix::Multiply(mat_15, mat_55) << std::endl;
+
+    std::cout << MatrixLib::Vector::Distance(v7_a.Swizzle<3>({ 4, 1, 2, 2, 0 }), v7_a.Swizzle<3>({ 2, 1, 6, 0, 3 })) << std::endl;
+
+
+    std::cout << MatrixLib::Vector::X_AXIS<5> << std::endl;
+    std::cout << MatrixLib::Vector::Y_AXIS<5> << std::endl;
+    std::cout << MatrixLib::Vector::Z_AXIS<5> << std::endl;
 
 
     return 0;
