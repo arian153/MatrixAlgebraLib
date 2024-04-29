@@ -109,7 +109,7 @@ int main()
         v7_a.Swizzle<5>({ 5, 4, 3, 3, 1 })
     };
 
-    MatrixLib::MatrixMxN<5, 3> mat_55 = {
+    MatrixLib::MatrixMxN<5, 3> mat_53 = {
         v7_a.Swizzle<3>({ 2, 5, 4, 1, 3 }),
         v7_a.Swizzle<3>({ 4, 1, 2, 2, 0 }),
         v7_a.Swizzle<3>({ 5, 4, 3, 3, 1 }),
@@ -117,18 +117,20 @@ int main()
         v7_a.Swizzle<3>({ 0, 1, 2, 4, 5 })
     };
 
-
     std::cout << "row vec * mat" << std::endl;
 
-    std::cout <<  MatrixLib::Matrix::Multiply(mat_15, mat_55) << std::endl;
+    std::cout << MatrixLib::Matrix::Multiply(mat_15, mat_53) << std::endl;
 
     std::cout << MatrixLib::Vector::Distance(v7_a.Swizzle<3>({ 4, 1, 2, 2, 0 }), v7_a.Swizzle<3>({ 2, 1, 6, 0, 3 })) << std::endl;
 
-
     std::cout << MatrixLib::Vector::X_AXIS<5> << std::endl;
     std::cout << MatrixLib::Vector::Y_AXIS<5> << std::endl;
-    std::cout << MatrixLib::Vector::Z_AXIS<5> << std::endl;
+    std::cout << MatrixLib::Vector::Z_AXIS<5> << std::endl << std::endl;
 
+    std::cout << MatrixLib::Matrix::IDENTITY<5> << std::endl << std::endl;
+    std::cout << MatrixLib::Matrix::ZERO<5, 7> << std::endl << std::endl;
+
+    std::cout << mat_53 * v7_a.Swizzle<3>({ 5, 4, 3, 3, 1 }) << std::endl << std::endl;
 
     return 0;
 }

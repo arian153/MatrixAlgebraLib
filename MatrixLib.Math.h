@@ -81,6 +81,11 @@ namespace MatrixLib
     class Matrix
     {
     public:
+        template <SizeT N>
+        const inline static MatrixMxN<N, N> IDENTITY = MatrixMxN<N, N>::Identity();
+
+        template <SizeT Row, SizeT Col>
+        const inline static MatrixMxN<Row, Col> ZERO = MatrixMxN<Row, Col>(Constant::ZERO);
 
     public:
         template <SizeT Row, SizeT Col>
@@ -445,7 +450,7 @@ namespace MatrixLib
         os << "{ " << rhs[0];
         for (SizeT i = 1; i < M; ++i)
         {
-            os << ",\n " << rhs[i];
+            os << ",\n  " << rhs[i];
         }
         os << " }";
         return os;

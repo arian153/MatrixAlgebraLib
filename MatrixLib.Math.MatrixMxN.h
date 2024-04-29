@@ -78,6 +78,9 @@ namespace MatrixLib
         MatrixMxN<N, M> Transposed() const;
         MatrixMxN       Negated() const;
 
+        // const
+        static constexpr MatrixMxN Identity();
+
     public: // range based for loop related methods
         auto begin();
         auto end();
@@ -618,6 +621,21 @@ namespace MatrixLib
         }
 
         return negated;
+    }
+
+    template <SizeT M, SizeT N>
+    constexpr MatrixMxN<M, N> MatrixMxN<M, N>::Identity()
+    {
+        MatrixMxN identity;
+        if constexpr (M == N)
+        {
+            for (SizeT i = 0; i < N; ++i)
+            {
+                identity(i, i) = Constant::ONE;
+            }
+        }
+
+        return identity;
     }
 
     template <SizeT M, SizeT N>
