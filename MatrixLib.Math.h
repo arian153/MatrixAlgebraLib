@@ -52,7 +52,16 @@ namespace MatrixLib
         template <SizeT Row, SizeT Col>
         static MatrixMxN<Row, Col> OuterProduct(const VectorN<Row>& vec_a, const VectorN<Col>& vec_b)
         {
-            return MatrixMxN<Row, Col>::OuterProductImpl(vec_a, vec_b);
+            MatrixMxN outer;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                for (SizeT col = 0; col < Col; ++col)
+                {
+                    outer[row][col] = vec_a[row] * vec_b[col];
+                }
+            }
+
+            return outer;
         }
 
         template <SizeT N>
@@ -220,19 +229,28 @@ namespace MatrixLib
         template <SizeT Row, SizeT ColA, SizeT ColB>
         static MatrixMxN<ColA, ColB> Solve(const MatrixMxN<Row, ColA>& mat_a, const MatrixMxN<Row, ColB>& mat_b)
         {
-            return MatrixMxN<Row, ColA>::SolveImpl(mat_a, mat_b);
+            // Solve A * x = b;
+            // x = A^-1 * b;
+
+            MatrixMxN<ColA, Row>  inv_a = Matrix::PseudoInverse(mat_a);
+            MatrixMxN<ColA, ColB> x     = Matrix::Multiply(inv_a, mat_b);
+
+            return x;
         }
 
         template <SizeT Row, SizeT Col>
         static MatrixMxN<Row, Col> HadamardProduct(const MatrixMxN<Row, Col>& mat_a, const MatrixMxN<Row, Col>& mat_b)
         {
-            return MatrixMxN<Row, Col>::HadamardProductImpl(mat_a, mat_b);
-        }
+            MatrixMxN hadamard;
+            for (SizeT row = 0; row < Row; ++row)
+            {
+                for (SizeT col = 0; col < Col; ++col)
+                {
+                    hadamard[row][col] = mat_a[row][col] * mat_b[row][col];
+                }
+            }
 
-        template <SizeT Row, SizeT Col>
-        static MatrixMxN<Row, Col> OuterProduct(const VectorN<Row>& vec_a, const VectorN<Col>& vec_b)
-        {
-            return MatrixMxN<Row, Col>::OuterProductImpl(vec_a, vec_b);
+            return hadamard;
         }
 
         template <SizeT Row, SizeT Col>

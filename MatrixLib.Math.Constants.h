@@ -55,9 +55,10 @@ namespace MatrixLib
         constexpr Real CUBE_ROOT_THREE = static_cast<Real>(1.25992104989487316476721);
         constexpr Real FORTH_ROOT_TWO  = static_cast<Real>(1.18920711500272106671749);
 
-        constexpr Real LN_TWO   = static_cast<Real>(0.69314718055994530941723);
-        constexpr Real LN_THREE = static_cast<Real>(1.09861228866810969139524);
-        constexpr Real LN_TEN   = static_cast<Real>(2.30258509299404568401799);
+        constexpr Real E_MATHEMATICAL = static_cast<Real>(2.71828182845904523536);
+        constexpr Real LN_TWO         = static_cast<Real>(0.69314718055994530941723);
+        constexpr Real LN_THREE       = static_cast<Real>(1.09861228866810969139524);
+        constexpr Real LN_TEN         = static_cast<Real>(2.30258509299404568401799);
 
         const Real RNAN = std::numeric_limits<Real>::quiet_NaN();
         const Real INF  = std::numeric_limits<Real>::infinity();

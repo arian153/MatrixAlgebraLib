@@ -88,21 +88,12 @@ namespace MatrixLib
         auto end() const;
 
     private: // private implementations 
-        static MatrixMxN<N, M> TransposeImpl(const MatrixMxN& input_mat_g);
-        static SizeT           RankImpl(const MatrixMxN& input_mat_g, Real tolerance);
-        static Real            DeterminantImpl(const MatrixMxN& input_mat_g);
-        static MatrixMxN       InverseImpl(const MatrixMxN& input_mat_g, bool use_permute);
-        static MatrixMxN<N, M> PseudoInverseImpl(const MatrixMxN& input_mat_g, Real tolerance);
-
-        template <SizeT A, SizeT B, SizeT C>
-        static MatrixMxN<B, C> SolveImpl(const MatrixMxN<A, B>& mat_a, const MatrixMxN<A, C>& mat_b);
-
-        template <SizeT A, SizeT B, SizeT C>
-        static MatrixMxN<A, C>         MultiplyImpl(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b);
+        static MatrixMxN<N, M>         TransposeImpl(const MatrixMxN& input_mat_g);
+        static SizeT                   RankImpl(const MatrixMxN& input_mat_g, Real tolerance);
+        static Real                    DeterminantImpl(const MatrixMxN& input_mat_g);
+        static MatrixMxN               InverseImpl(const MatrixMxN& input_mat_g, bool use_permute);
+        static MatrixMxN<N, M>         PseudoInverseImpl(const MatrixMxN& input_mat_g, Real tolerance);
         static MatrixMxN<M - 1, N - 1> MinorMatrixImpl(const MatrixMxN& input_mat_g, SizeT row, SizeT col);
-
-        static MatrixMxN HadamardProductImpl(const MatrixMxN& mat_a, const MatrixMxN& mat_b);
-        static MatrixMxN OuterProductImpl(const VectorN<M>& vec_a, const VectorN<N>& vec_b);
 
     private: // Free-Size Matrix for some calculations;
         class MatrixFxF
@@ -1094,40 +1085,6 @@ namespace MatrixLib
     }
 
     template <SizeT M, SizeT N>
-    template <SizeT A, SizeT B, SizeT C>
-    MatrixMxN<B, C> MatrixMxN<M, N>::SolveImpl(const MatrixMxN<A, B>& mat_a, const MatrixMxN<A, C>& mat_b)
-    {
-        // Solve A * x = b;
-        // x = A^-1 * b;
-        MatrixMxN<B, A> inv_a = MatrixMxN::PseudoInverseImpl(mat_a, Constant::EPSILON);
-        MatrixMxN<B, C> x     = MatrixMxN::MultiplyImpl(inv_a, mat_b);
-        return x;
-    }
-
-    template <SizeT M, SizeT N>
-    template <SizeT A, SizeT B, SizeT C>
-    MatrixMxN<A, C> MatrixMxN<M, N>::MultiplyImpl(MatrixMxN<A, B> mat_a, MatrixMxN<B, C> mat_b)
-    {
-        MatrixMxN<A, C> multiplied;
-        for (SizeT row = 0; row < A; ++row)
-        {
-            for (SizeT col = 0; col < C; ++col)
-            {
-                multiplied(row, col) = Constant::ZERO;
-                VectorN<B> row_vec   = mat_a.Row(row);
-                VectorN<B> col_vec   = mat_b.Column(col);
-
-                for (SizeT i = 0; i < B; ++i)
-                {
-                    multiplied(row, col) += row_vec[i] * col_vec[i];
-                }
-            }
-        }
-
-        return multiplied;
-    }
-
-    template <SizeT M, SizeT N>
     MatrixMxN<M - 1, N - 1> MatrixMxN<M, N>::MinorMatrixImpl(const MatrixMxN& input_mat_g, SizeT row, SizeT col)
     {
         // https://en.wikipedia.org/wiki/Minor_(linear_algebra)
@@ -1159,36 +1116,6 @@ namespace MatrixLib
         }
 
         return minor;
-    }
-
-    template <SizeT M, SizeT N>
-    MatrixMxN<M, N> MatrixMxN<M, N>::HadamardProductImpl(const MatrixMxN& mat_a, const MatrixMxN& mat_b)
-    {
-        MatrixMxN hadamard;
-        for (SizeT row = 0; row < M; ++row)
-        {
-            for (SizeT col = 0; col < N; ++col)
-            {
-                hadamard[row][col] = mat_a[row][col] * mat_b[row][col];
-            }
-        }
-
-        return hadamard;
-    }
-
-    template <SizeT M, SizeT N>
-    MatrixMxN<M, N> MatrixMxN<M, N>::OuterProductImpl(const VectorN<M>& vec_a, const VectorN<N>& vec_b)
-    {
-        MatrixMxN outer;
-        for (SizeT row = 0; row < M; ++row)
-        {
-            for (SizeT col = 0; col < N; ++col)
-            {
-                outer[row][col] = vec_a[row] * vec_b[col];
-            }
-        }
-
-        return outer;
     }
 
     template <SizeT M, SizeT N>
