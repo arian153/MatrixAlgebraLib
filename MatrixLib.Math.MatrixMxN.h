@@ -70,6 +70,8 @@ namespace MatrixLib
         bool            IsIdentity() const;
         bool            IsInvertible() const;
         SizeT           Rank() const;
+        SizeT           SmallestIdx() const;
+        SizeT           LargestIdx() const;
         Real            Trace() const;
         Real            Determinant() const;
         VectorN<N>      Row(SizeT row) const;
@@ -544,6 +546,32 @@ namespace MatrixLib
     SizeT MatrixMxN<M, N>::Rank() const
     {
         return RankImpl(*this);
+    }
+
+    template <SizeT M, SizeT N>
+    SizeT MatrixMxN<M, N>::SmallestIdx() const
+    {
+        SizeT smallest_idx = 0;
+        for (SizeT i = 1; i < N; ++i)
+        {
+            if ((*this)(i) < (*this)(smallest_idx))
+                smallest_idx = i;
+        }
+
+        return smallest_idx;
+    }
+
+    template <SizeT M, SizeT N>
+    SizeT MatrixMxN<M, N>::LargestIdx() const
+    {
+        SizeT largest_idx = 0;
+        for (SizeT i = 1; i < N; ++i)
+        {
+            if ((*this)(i) > (*this)(largest_idx))
+                largest_idx = i;
+        }
+
+        return largest_idx;
     }
 
     template <SizeT M, SizeT N>
