@@ -134,6 +134,11 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MathLib\MathLib.Constants.h" />
+    <ClInclude Include="MathLib\MathLib.h" />
+    <ClInclude Include="MathLib\MathLib.MatrixMxN.h" />
+    <ClInclude Include="MathLib\MathLib.Tools.h" />
+    <ClInclude Include="MathLib\MathLib.VectorN.h" />
     <ClInclude Include="MatrixLib.Math.Constants.h" />
     <ClInclude Include="MatrixLib.Math.h" />
     <ClInclude Include="MatrixLib.Math.MatrixMxN.h" />

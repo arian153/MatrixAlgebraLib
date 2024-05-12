@@ -32,6 +32,21 @@
     <ClInclude Include="MatrixLib.Math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MathLib\MathLib.Constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MathLib\MathLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MathLib\MathLib.MatrixMxN.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MathLib\MathLib.Tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MathLib\MathLib.VectorN.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="MatrixLib.Math.Tools.h">
