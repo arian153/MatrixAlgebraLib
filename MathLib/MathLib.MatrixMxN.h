@@ -93,4 +93,6 @@ namespace MathLib
         static MatrixMxN PseudoInverseImpl(const MatrixMxN& input_mat_g, Real tolerance);
         static MatrixMxN MinorMatrixImpl(const MatrixMxN& input_mat_g, SizeT row, SizeT col);
     };
+
+   
 }

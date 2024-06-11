@@ -18,6 +18,15 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MathLib\MathLib.MatrixMxN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MathLib\MathLib.Tools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MathLib\MathLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatrixLib.Math.VectorN.h">
@@ -52,5 +61,6 @@
     <None Include="MatrixLib.Math.Tools.h">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="MathLib\MathLib.VectorN.cpp" />
   </ItemGroup>
 </Project>

@@ -132,6 +132,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MathLib\MathLib.cpp" />
+    <ClCompile Include="MathLib\MathLib.MatrixMxN.cpp" />
+    <ClCompile Include="MathLib\MathLib.Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MathLib\MathLib.Constants.h" />
@@ -145,6 +148,7 @@
     <ClInclude Include="MatrixLib.Math.VectorN.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MathLib\MathLib.VectorN.cpp" />
     <None Include="MatrixLib.Math.Tools.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
